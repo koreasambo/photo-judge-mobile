@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진품질판정원 · Mobile v1.4</title>
+<title>사진품질판정원 · Mobile v1.5</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -46,7 +46,6 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 #stage.state-keep{border-color:#668c70;box-shadow:0 0 0 2px #486a4f55,0 18px 55px #0008}
 #stage.state-hold{border-color:#b18b43;box-shadow:0 0 0 2px #8b6b2f55,0 18px 55px #0008}
 #stage.state-kill{border-color:#a64d53;box-shadow:0 0 0 2px #7a303455,0 18px 55px #0008}
-#stage.state-plenary{border-color:#8c78bb;box-shadow:0 0 0 2px #51436f66,0 18px 55px #0008}
 #photo{display:none;position:absolute;left:50%;top:50%;max-width:none;max-height:none;object-fit:contain;
   user-select:none;-webkit-user-drag:none;transform-origin:center center;cursor:default;will-change:transform,left,top}
 #photo.zoomed{cursor:grab}
@@ -189,7 +188,6 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   #stage.state-keep{border-color:#b7837e;box-shadow:0 0 0 2px #9d645f33,0 16px 38px #5f4e3d24}
   #stage.state-hold{border-color:#cbb071;box-shadow:0 0 0 2px #d8bd8644,0 16px 38px #5f4e3d24}
   #stage.state-kill{border-color:#6a7b8e;box-shadow:0 0 0 2px #4f607444,0 16px 38px #5f4e3d24}
-  #stage.state-plenary{border-color:#8c78bb}
   #empty{padding:24px;color:#b4aaa0;font-size:13px}
   #empty strong{font-size:20px;color:#f7efe4}
   #nameTag{bottom:10px;max-width:88%;border-radius:14px;font-size:10px;padding:6px 10px}
@@ -269,7 +267,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진품질판정원</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div class="subline">MOBILE v1.4 · GO / HOLD / DROP</div>
+    <div class="subline">MOBILE v1.5 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -437,7 +435,7 @@ let reviewMode=null, reviewIndices=null;
 let resultThumbUrls=[];
 let verdictRootHandle=null;
 let saveBusy=false;
-let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false;
+let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT=9;
 const SESSION_KEY='photoCourt.v2.3.session';
 const RECORD_KEY='photoCourt.records.v1';
@@ -892,30 +890,61 @@ async function initDriveLibraries(){
   try{return await driveLibPromise;}catch(e){driveLibPromise=null;throw e;}
 }
 
+function updateDriveButtons(){
+  for(const sel of ['#mDrive','#mDriveImport','#driveImportBtn']){
+    const b=$(sel);if(!b)continue;
+    b.disabled=driveBusy;
+    if(sel==='#mDrive'){
+      b.textContent=driveBusy?'불러오는 중…':(driveReady?'Drive':'Drive 준비중');
+    }
+  }
+}
 function setDriveBusy(busy){
   driveBusy=busy;
-  for(const sel of ['#mDrive','#mDriveImport','#driveImportBtn']){
-    const b=$(sel);if(!b)continue;b.disabled=busy;
-    if(sel==='#mDrive') b.textContent=busy?'불러오는 중…':'Drive';
+  updateDriveButtons();
+}
+async function preloadGoogleDrive(){
+  if(driveReady)return true;
+  try{
+    await initDriveLibraries();
+    driveReady=!!(driveTokenClient && window.google?.picker);
+    driveInitError=null;
+    updateDriveButtons();
+    return driveReady;
+  }catch(err){
+    driveInitError=err;
+    driveReady=false;
+    updateDriveButtons();
+    return false;
   }
 }
 
-async function openGoogleDrive(){
+function openGoogleDrive(){
   if(driveBusy)return;
+  // 모바일 브라우저는 사용자 클릭과 OAuth 팝업 사이에 await가 끼면 팝업을 막을 수 있다.
+  // 라이브러리는 페이지 로드 시 미리 준비하고, 클릭 순간에는 requestAccessToken을 즉시 호출한다.
+  if(!driveReady || !driveTokenClient || !window.google?.picker){
+    showToast('Drive 준비 중… 잠시 후 다시 눌러주세요.');
+    preloadGoogleDrive();
+    return;
+  }
   setDriveBusy(true);
-  try{
-    showToast('Google Drive 연결 중…');
-    await initDriveLibraries();
-    driveTokenClient.callback=(resp)=>{
-      if(resp?.error){setDriveBusy(false);alert('Google 로그인에 실패했습니다: '+resp.error);return;}
-      driveAccessToken=resp.access_token;
+  showToast('Google Drive 연결 중…');
+  driveTokenClient.callback=(resp)=>{
+    if(resp?.error){
       setDriveBusy(false);
-      createDrivePicker();
-    };
+      alert('Google 로그인에 실패했습니다: '+resp.error+'\n\nOAuth 앱이 테스트 중이면 현재 Google 계정을 테스트 사용자에 추가했는지 확인해 주세요.');
+      return;
+    }
+    driveAccessToken=resp.access_token;
+    setDriveBusy(false);
+    createDrivePicker();
+  };
+  try{
     driveTokenClient.requestAccessToken({prompt:driveAccessToken?'':'consent'});
   }catch(err){
     setDriveBusy(false);
-    alert('Google Drive 연결 중 문제가 생겼습니다.\n\n'+err.message+'\n\nOAuth 앱이 테스트 중이면 현재 Google 계정을 테스트 사용자에 추가했는지 확인해 주세요.');
+    alert('Google Drive 로그인 창을 열지 못했습니다.\n\n'+err.message+'\n\n브라우저 팝업 차단을 해제한 뒤 다시 시도해 주세요.');
   }
 }
 
@@ -1183,6 +1212,8 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
+updateDriveButtons();
+setTimeout(()=>preloadGoogleDrive(),0);
 render();
 })();
 </script>

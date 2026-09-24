@@ -1,4 +1,4 @@
-사진품질판정원 MOBILE · GitHub Pages v1.4
+사진품질판정원 MOBILE · GitHub Pages v1.5
 
 핵심 기능
 - 휴대폰/컴퓨터 로컬 사진 다중 선택
@@ -21,3 +21,8 @@ Google Drive 연동
 2. main / (root) GitHub Pages 설정 유지
 3. 배포 주소: https://koreasambo.github.io/photo-judge-mobile/
 4. 캐시 때문에 구버전이 보이면 브라우저 새로고침 또는 앱을 완전히 종료 후 다시 실행
+
+v1.5 모바일 Drive 수정
+- Google API/GIS 라이브러리를 페이지 로드 직후 미리 준비
+- 모바일 브라우저에서 Drive 버튼 클릭 즉시 OAuth 토큰 요청
+- 비동기 로딩 때문에 사용자 클릭 권한이 끊겨 로그인 팝업이 막히던 문제 수정
