@@ -1,0 +1,21 @@
+{
+  "name": "사진품질판정원 PC",
+  "short_name": "사진판정원",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#171614",
+  "theme_color": "#171614",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
