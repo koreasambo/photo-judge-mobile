@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진품질판정원 · Mobile v1.1</title>
+<title>사진품질판정원 · Mobile v1.2</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -97,7 +97,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 #statusbar b{color:#eee2cf}
 .actionRow{display:grid;grid-template-columns:150px 1fr 1.55fr 140px;gap:9px;align-items:center}
 #verdictPanel{position:absolute;z-index:10;left:50%;bottom:92px;transform:translateX(-50%);
-  width:min(760px,62vw);display:grid;grid-template-columns:1fr 1fr 1fr 1.35fr;gap:9px;text-align:center}
+  width:min(760px,62vw);display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;text-align:center}
 #verdictPanel .btn{height:52px}
 .btn{height:48px;border-radius:8px;border:1px solid #4b453d;color:var(--paper);font-weight:950;
   cursor:pointer;background:#2c2924;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -266,7 +266,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진품질판정원</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div class="subline">MOBILE v1.1 · GO / HOLD / DROP</div>
+    <div class="subline">MOBILE v1.2 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -278,13 +278,11 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <div class="drawerMascots"><img src="./GO.png" alt="배곰이와 곰톨이"></div>
       <button id="mHistory" class="drawerItem"><b>History</b><span>판결 결과 모아보기</span></button>
       <button id="mReview" class="drawerItem"><b>Review</b><span>미검수 사진부터 보기</span></button>
-      <button id="mPlenary" class="drawerItem"><b>Deep Review</b><span>현재 사진 전원합의체 회부</span></button>
       <button id="mExport" class="drawerItem"><b>Export</b><span>판정표 CSV 저장</span></button>
       <div class="drawerSection">Settings</div>
       <label class="drawerToggle"><span>파일명 표시</span><input id="mOptName" type="checkbox" checked></label>
       <label class="drawerToggle"><span>촬영정보 표시</span><input id="mOptResume" type="checkbox"></label>
       <label class="drawerToggle"><span>썸네일 보기</span><input id="mOptThumb" type="checkbox"></label>
-      <label class="drawerToggle"><span>마지막 판정 후 완료창</span><input id="mOptFinish" type="checkbox" checked></label>
       <label class="drawerToggle"><span>버튼 진동</span><input id="mOptVibrate" type="checkbox" checked></label>
       <button id="mSaveRoot" class="drawerItem"><b>정리 폴더 선택</b><span>GO / HOLD / DROP 저장 위치 지정</span></button>
       <button id="mEndTrial" class="drawerDanger">현재 재판 종결</button>
@@ -316,7 +314,6 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
     <div class="shortRow"><span class="keycap">1</span><span>살려</span></div>
     <div class="shortRow"><span class="keycap">2</span><span>보류</span></div>
     <div class="shortRow"><span class="keycap">3</span><span>죽여</span></div>
-    <div class="shortRow"><span class="keycap">4</span><span>전원합의체</span></div>
     <div class="shortRow"><span class="keycap">Z</span><span>100% / 맞춤</span></div>
   </aside>
 
@@ -330,7 +327,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   </aside>
 
   <section id="bottom">
-    <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · REVIEW <b id="cPlenary">0</b> · 미검수 <b id="cNone">0</b></div>
+    <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · 미검수 <b id="cNone">0</b></div>
     <div class="actionRow">
       <label for="picker" class="btn">사진 왕창 넣기</label>
       <button id="unreviewedBtn" class="btn">아직 안 본 놈 어디갔노</button>
@@ -343,13 +340,12 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
     <button id="keepBtn" class="btn keep"><img src="./GO.png" alt=""><span>GO</span><small>1</small></button>
     <button id="holdBtn" class="btn hold"><img src="./HOLD.png" alt=""><span>HOLD</span><small>2</small></button>
     <button id="killBtn" class="btn kill"><img src="./DROP.png" alt=""><span>DROP</span><small>3</small></button>
-    <button id="plenaryBtn" class="btn plenary">REVIEW <small>4</small></button>
   </div>
 
   <input id="picker" class="fileInput" type="file" multiple accept=".jpg,.jpeg,.png,.webp,.bmp,.gif,image/*">
 </div>
 
-<div id="finishSheet" class="mobileOnly finishSheet" aria-hidden="true">
+<div id="finishSheet" class="mobileOnly finishSheet" aria-hidden="true" style="display:none!important">
   <div class="finishBackdrop" data-close-finish></div>
   <section class="finishPanel" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
     <div class="finishHandle"></div>
@@ -374,11 +370,11 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 
 <div id="results">
   <div class="resultHead">
-    <div class="resultTitle">판결문</div>
+    <div class="resultTitle">판정 완료</div>
     <div class="resultTopBtns">
-      <button id="backBtn" class="btn smallBtn">재판정으로 돌아가기</button>
-      <button id="csvBtn" class="btn smallBtn">판결문 사본 챙기기</button>
-      <button id="resetSaveRoot" class="btn smallBtn">저장소 다시 고르기</button>
+      <button id="backBtn" class="btn smallBtn">사진 다시 보기</button>
+      <button id="csvBtn" class="btn smallBtn">판정표 저장</button>
+      <button id="resetSaveRoot" class="btn smallBtn">정리 폴더 다시 고르기</button>
     </div>
   </div>
 
@@ -401,20 +397,6 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
         <button id="appealKill" class="btn smallBtn">항소</button>
         <button id="acceptKill" class="btn kill smallBtn">승낙</button>
       </div>
-      <div class="orderRow plenaryRow">
-        <div><div class="orderText">제4항 · 전원합의체 회부</div><div class="orderCount" id="orderPlenaryCount">0장</div></div>
-        <button id="acceptPlenary" class="btn plenary smallBtn">승낙</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="docketBox" class="docketBox">
-    <h3>전원합의체 회부 준비 완료</h3>
-    <p>제4항 사진만 기계 정밀검토 모듈로 넘길 수 있도록 회부목록을 만들었습니다.</p>
-    <p>뷰어와 분석기는 분리 유지. 이 버튼은 분석기 연결점입니다.</p>
-    <div class="resultTopBtns">
-      <button id="saveDocket" class="btn plenary smallBtn">회부목록 챙기기</button>
-      <button id="hideDocket" class="btn smallBtn">닫기</button>
     </div>
   </div>
 
@@ -431,10 +413,6 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <h3 id="killTitle">제3항 · DROP · 0</h3>
       <div id="killGrid" class="grid"></div>
     </section>
-    <section class="group">
-      <h3 id="plenaryTitle">제4항 · 전원합의체 회부 · 0</h3>
-      <div id="plenaryGrid" class="grid"></div>
-    </section>
   </div>
 </div>
 
@@ -444,7 +422,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 const counter=$('#counter'), nameTag=$('#nameTag'), resume=$('#resume'), toast=$('#toast'), filmstrip=$('#filmstrip'), recordBadge=$('#recordBadge'), recordText=$('#recordText');
-const keepBtn=$('#keepBtn'), holdBtn=$('#holdBtn'), killBtn=$('#killBtn'), plenaryBtn=$('#plenaryBtn');
+const keepBtn=$('#keepBtn'), holdBtn=$('#holdBtn'), killBtn=$('#killBtn');
 const results=$('#results');
 let files=[], idx=0, decisions=new Map(), cache=new Map(), toastTimer=null;
 let reviewMode=null, reviewIndices=null;
@@ -455,7 +433,7 @@ const CACHE_LIMIT=9;
 const SESSION_KEY='photoCourt.v2.3.session';
 const RECORD_KEY='photoCourt.records.v1';
 const PREF_KEY='photoCourt.mobile.prefs.v1';
-let mobilePrefs={finish:true,vibrate:true};
+let mobilePrefs={vibrate:true};
 let finishShown=false;
 let saveTimer=null, recordSaveTimer=null;
 let criminalRecords=new Map(), priorAtImport=new Map();
@@ -481,7 +459,7 @@ function loadCriminalRecords(){
     if(raw){
       const data=JSON.parse(raw);
       for(const [k,v] of Object.entries(data||{})){
-        if(['keep','hold','kill','plenary'].includes(v)) out.set(k,v);
+        if(['keep','hold','kill'].includes(v)) out.set(k,v);
       }
     }
   }catch{}
@@ -490,7 +468,7 @@ function loadCriminalRecords(){
   if(old && old.decisions){
     let changed=false;
     for(const [k,v] of Object.entries(old.decisions||{})){
-      if(['keep','hold','kill','plenary'].includes(v) && !out.has(k)){out.set(k,v);changed=true;}
+      if(['keep','hold','kill'].includes(v) && !out.has(k)){out.set(k,v);changed=true;}
     }
     if(changed){
       try{localStorage.setItem(RECORD_KEY,JSON.stringify(Object.fromEntries(out)));}catch{}
@@ -505,7 +483,7 @@ function scheduleSaveRecords(){
   },180);
 }
 function statusKorean(v){
-  return v==='keep'?'GO':v==='hold'?'HOLD':v==='kill'?'DROP':v==='plenary'?'REVIEW':'-';
+  return v==='keep'?'GO':v==='hold'?'HOLD':v==='kill'?'DROP':'-';
 }
 criminalRecords=loadCriminalRecords();
 try{
@@ -530,7 +508,7 @@ function restoreSessionForFiles(){
   if(!saved || saved.closed===true) return 0;
   const allowed=new Set(files.map(keyOf)); let restored=0;
   for(const [k,v] of Object.entries(saved.decisions||{})){
-    if(allowed.has(k)&&['keep','hold','kill','plenary'].includes(v)){decisions.set(k,v);restored++;}
+    if(allowed.has(k)&&['keep','hold','kill'].includes(v)){decisions.set(k,v);restored++;}
   }
   if(saved.lastKey){const i=files.findIndex(f=>keyOf(f)===saved.lastKey); if(i>=0)idx=i;}
   return restored;
@@ -648,22 +626,21 @@ function showToast(msg){
   toastTimer=setTimeout(()=>toast.classList.remove('show'),900);
 }
 function countStatus(){
-  let k=0,h=0,d=0,p=0;
+  let k=0,h=0,d=0;
   for(const v of decisions.values()){
-    if(v==='keep')k++; else if(v==='hold')h++; else if(v==='kill')d++; else if(v==='plenary')p++;
+    if(v==='keep')k++; else if(v==='hold')h++; else if(v==='kill')d++;
   }
-  $('#cKeep').textContent=k; $('#cHold').textContent=h; $('#cKill').textContent=d; $('#cPlenary').textContent=p;
-  $('#cNone').textContent=Math.max(0,files.length-k-h-d-p);
+  $('#cKeep').textContent=k; $('#cHold').textContent=h; $('#cKill').textContent=d;
+  $('#cNone').textContent=Math.max(0,files.length-k-h-d);
 }
 function activeState(){
-  [keepBtn,holdBtn,killBtn,plenaryBtn].forEach(b=>b.classList.remove('active'));
-  stage.classList.remove('state-keep','state-hold','state-kill','state-plenary');
+  [keepBtn,holdBtn,killBtn].forEach(b=>b.classList.remove('active'));
+  stage.classList.remove('state-keep','state-hold','state-kill');
   const f=currentFile(); if(!f)return;
   const st=decisions.get(keyOf(f));
   if(st==='keep'){keepBtn.classList.add('active');stage.classList.add('state-keep');}
   if(st==='hold'){holdBtn.classList.add('active');stage.classList.add('state-hold');}
   if(st==='kill'){killBtn.classList.add('active');stage.classList.add('state-kill');}
-  if(st==='plenary'){plenaryBtn.classList.add('active');stage.classList.add('state-plenary');}
 }
 function renderFilmstrip(){
   filmstrip.innerHTML='';
@@ -719,19 +696,19 @@ function move(delta){
   idx=Math.max(0,Math.min(max,idx+delta)); render();
 }
 function decisionCounts(){
-  let keep=0,hold=0,kill=0,plenary=0;
+  let keep=0,hold=0,kill=0;
   for(const f of files){
     const v=decisions.get(keyOf(f));
-    if(v==='keep')keep++; else if(v==='hold')hold++; else if(v==='kill')kill++; else if(v==='plenary')plenary++;
+    if(v==='keep')keep++; else if(v==='hold')hold++; else if(v==='kill')kill++;
   }
-  return {keep,hold,kill,plenary,done:keep+hold+kill+plenary,total:files.length};
+  return {keep,hold,kill,done:keep+hold+kill,total:files.length};
 }
 function allReviewed(){const c=decisionCounts();return c.total>0 && c.done===c.total;}
 function openFinishSheet(){
   if(!$('#finishSheet'))return;
   const c=decisionCounts();
   $('#finishGo').textContent=c.keep;$('#finishHold').textContent=c.hold;$('#finishDrop').textContent=c.kill;
-  $('#finishSub').textContent=c.plenary?`전체 ${c.total}장 · REVIEW ${c.plenary}장 포함`:`전체 ${c.total}장 판정 완료`;
+  $('#finishSub').textContent=`전체 ${c.total}장 판정 완료`;
   $('#finishSheet').classList.add('open');$('#finishSheet').setAttribute('aria-hidden','false');finishShown=true;haptic(24);
 }
 function closeFinishSheet(){if(!$('#finishSheet'))return;$('#finishSheet').classList.remove('open');$('#finishSheet').setAttribute('aria-hidden','true');}
@@ -757,12 +734,12 @@ function decide(status){
   if(status==='keep')showToast('GO · 남긴다');
   if(status==='hold')showToast('HOLD · 다시 본다');
   if(status==='kill')showToast('DROP · 제외한다');
-  if(status==='plenary')showToast('REVIEW · 다시 검토');
   activeState(); countStatus(); scheduleSaveSession();
   const max=(reviewIndices?reviewIndices.length:files.length)-1;
   const finished=!reviewIndices && allReviewed();
-  if(finished && mobilePrefs.finish && !finishShown){
-    setTimeout(()=>{openFinishSheet();},260);
+  if(finished && !finishShown){
+    finishShown=true;
+    setTimeout(()=>{ toast.classList.remove('show'); openResults(); haptic(24); },260);
   }else if(idx<max){
     setTimeout(()=>{ idx++; render(); },125);
   }
@@ -799,7 +776,6 @@ async function endTrialAndReset(){
   reviewIndices=null;
   verdictRootHandle=null;
   saveBusy=false;
-  plenaryDocket=[];
   picker.value='';
 
   if(document.fullscreenElement){
@@ -825,9 +801,9 @@ async function endTrialAndReset(){
   filmstrip.innerHTML='';filmstrip.style.display='none';
   fitScale=1;zoomScale=1;panX=0;panY=0;
   counter.textContent='0000 / 0000';
-  $('#cKeep').textContent='0';$('#cHold').textContent='0';$('#cKill').textContent='0';$('#cPlenary').textContent='0';$('#cNone').textContent='0';
-  [keepBtn,holdBtn,killBtn,plenaryBtn].forEach(b=>b.classList.remove('active'));
-  stage.classList.remove('state-keep','state-hold','state-kill','state-plenary');
+  $('#cKeep').textContent='0';$('#cHold').textContent='0';$('#cKill').textContent='0';$('#cNone').textContent='0';
+  [keepBtn,holdBtn,killBtn].forEach(b=>b.classList.remove('active'));
+  stage.classList.remove('state-keep','state-hold','state-kill');
   $('#zoomBadge').textContent='맞춤 보기 · 휠 확대 · 드래그 이동';
   showToast('재판 종결! 기록은 보관합니다.');
 }
@@ -873,7 +849,6 @@ picker.addEventListener('change',e=>{
 keepBtn.onclick=()=>decide('keep');
 holdBtn.onclick=()=>decide('hold');
 killBtn.onclick=()=>decide('kill');
-plenaryBtn.onclick=()=>decide('plenary');
 
 document.addEventListener('keydown',e=>{
   if(results.classList.contains('show'))return;
@@ -884,7 +859,6 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='1'){e.preventDefault();decide('keep');}
   else if(e.key==='2'){e.preventDefault();decide('hold');}
   else if(e.key==='3'){e.preventDefault();decide('kill');}
-  else if(e.key==='4'){e.preventDefault();decide('plenary');}
   else if(e.code==='Space'){e.preventDefault();move(1);}
   else if(k==='z'){e.preventDefault();toggleHundred();}
   else if(e.key==='Escape'&&reviewIndices){reviewIndices=null;reviewMode=null;idx=0;render();}
@@ -950,24 +924,21 @@ function fillGrid(el,rows){
   el.innerHTML=''; const limit=140, frag=document.createDocumentFragment();
   rows.slice(0,limit).forEach(x=>frag.appendChild(makeCard(x)));
   if(rows.length>limit){
-    const more=document.createElement('div');more.className='card moreCard';more.textContent=`+ ${rows.length-limit}장\n(항소/승낙에는 전부 포함)`;
+    const more=document.createElement('div');more.className='card moreCard';more.textContent=`+ ${rows.length-limit}장\n(전체 결과에 포함)`;
     frag.appendChild(more);
   }
   el.appendChild(frag);
 }
 function openResults(){
   clearResultThumbUrls();
-  const k=rowsBy('keep'),h=rowsBy('hold'),d=rowsBy('kill'),p=rowsBy('plenary');
+  const k=rowsBy('keep'),h=rowsBy('hold'),d=rowsBy('kill');
   $('#keepTitle').textContent=`제1항 · GO · ${k.length}`;
   $('#holdTitle').textContent=`제2항 · HOLD · ${h.length}`;
   $('#killTitle').textContent=`제3항 · DROP · ${d.length}`;
-  $('#plenaryTitle').textContent=`제4항 · 전원합의체 회부 · ${p.length}`;
   $('#orderKeepCount').textContent=`${k.length}장`;
   $('#orderHoldCount').textContent=`${h.length}장`;
   $('#orderKillCount').textContent=`${d.length}장`;
-  $('#orderPlenaryCount').textContent=`${p.length}장`;
-  fillGrid($('#keepGrid'),k); fillGrid($('#holdGrid'),h); fillGrid($('#killGrid'),d); fillGrid($('#plenaryGrid'),p);
-  $('#docketBox').classList.remove('show');
+  fillGrid($('#keepGrid'),k); fillGrid($('#holdGrid'),h); fillGrid($('#killGrid'),d);
   results.classList.add('show'); results.scrollTop=0;
 }
 $('#submitBtn').onclick=openResults;
@@ -1030,34 +1001,11 @@ $('#resetSaveRoot').onclick=()=>{
   alert('저장소 기억을 비웠습니다. 다음 승낙 때 저장 폴더를 다시 고릅니다.');
 };
 
-let plenaryDocket=[];
-$('#acceptPlenary').onclick=()=>{
-  plenaryDocket=rowsBy('plenary');
-  if(!plenaryDocket.length){alert('전원합의체에 회부할 사진이 없습니다.');return;}
-  $('#docketBox').classList.add('show');
-  $('#docketBox').scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(()=>alert(`전원합의체 회부 승인 · ${plenaryDocket.length}장\n\n뷰어는 그대로 유지됩니다.\n다음 단계에서 기존 고퀄 분석기를 이 연결점에 붙이면 됩니다.`),80);
-};
-$('#hideDocket').onclick=()=>$('#docketBox').classList.remove('show');
-$('#saveDocket').onclick=()=>{
-  if(!plenaryDocket.length)return;
-  const data={
-    title:'사진품질판정원 전원합의체 회부목록',
-    version:'2.3',
-    createdAt:new Date().toISOString(),
-    count:plenaryDocket.length,
-    files:plenaryDocket.map(x=>({name:x.f.name,size:x.f.size,lastModified:x.f.lastModified,type:x.f.type||''}))
-  };
-  const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}));
-  const a=document.createElement('a');a.href=u;a.download='전원합의체_회부목록.json';a.click();
-  setTimeout(()=>URL.revokeObjectURL(u),1200);
-};
-
 $('#csvBtn').onclick=()=>{
   const lines=[['파일명','판정']];
   for(const f of files){
     const st=decisions.get(keyOf(f));
-    lines.push([f.name,st==='keep'?'GO':st==='hold'?'HOLD':st==='kill'?'DROP':st==='plenary'?'REVIEW':'미검수']);
+    lines.push([f.name,st==='keep'?'GO':st==='hold'?'HOLD':st==='kill'?'DROP':'미검수']);
   }
   const esc=v=>`"${String(v).replaceAll('"','""')}"`;
   const csv='\ufeff'+lines.map(r=>r.map(esc).join(',')).join('\r\n');
@@ -1078,7 +1026,6 @@ if($('#mPrev')) $('#mPrev').onclick=()=>move(-1);
 if($('#mNext')) $('#mNext').onclick=()=>move(1);
 if($('#mHistory')) $('#mHistory').onclick=()=>{closeDrawer();openResults();};
 if($('#mReview')) $('#mReview').onclick=()=>{closeDrawer();$('#unreviewedBtn').click();};
-if($('#mPlenary')) $('#mPlenary').onclick=()=>{closeDrawer();decide('plenary');};
 if($('#mExport')) $('#mExport').onclick=()=>{closeDrawer();$('#csvBtn').click();};
 if($('#mEndTrial')) $('#mEndTrial').onclick=()=>{closeDrawer();endTrialAndReset();};
 function bindMirror(mobileSel,desktopSel,after){
@@ -1088,7 +1035,6 @@ function bindMirror(mobileSel,desktopSel,after){
   d.addEventListener('change',()=>{m.checked=d.checked;});
 }
 bindMirror('#mOptName','#optName');bindMirror('#mOptResume','#optResume');bindMirror('#mOptThumb','#optThumb');
-if($('#mOptFinish')){ $('#mOptFinish').checked=mobilePrefs.finish; $('#mOptFinish').onchange=e=>{mobilePrefs.finish=e.target.checked;saveMobilePrefs();}; }
 if($('#mOptVibrate')){ $('#mOptVibrate').checked=mobilePrefs.vibrate; $('#mOptVibrate').onchange=e=>{mobilePrefs.vibrate=e.target.checked;saveMobilePrefs();haptic(18);}; }
 if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();verdictRootHandle=null;const h=await getVerdictRootHandle();if(h)showToast('정리 폴더 선택 완료');};
 if($('#finishClose')) $('#finishClose').onclick=closeFinishSheet;
