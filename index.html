@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진품질판정원 · Mobile v1.2</title>
+<title>사진품질판정원 · Mobile v1.4</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -95,7 +95,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   width:min(980px,76vw);text-align:center}
 #statusbar{font-size:11px;color:#aaa093;margin-bottom:8px;text-align:center}
 #statusbar b{color:#eee2cf}
-.actionRow{display:grid;grid-template-columns:150px 1fr 1.55fr 140px;gap:9px;align-items:center}
+.actionRow{display:grid;grid-template-columns:130px 130px 1fr 1.35fr 120px;gap:9px;align-items:center}
 #verdictPanel{position:absolute;z-index:10;left:50%;bottom:92px;transform:translateX(-50%);
   width:min(760px,62vw);display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;text-align:center}
 #verdictPanel .btn{height:52px}
@@ -127,9 +127,9 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 .orderKicker{font-size:12px;color:#9f9588;font-weight:900;letter-spacing:.18em;text-align:center}
 .orderMain{font-size:27px;font-weight:950;margin-top:5px;text-align:center}
 .orderRows{margin-top:18px;display:grid;gap:9px}
-.orderRow{display:grid;grid-template-columns:1fr 150px 150px;gap:8px;align-items:center;
+.orderRow{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;
   border-top:1px solid #39352f;padding-top:9px;text-align:center}
-.orderRow.plenaryRow{grid-template-columns:1fr 308px}
+.orderRow.plenaryRow{grid-template-columns:1fr}
 .orderText{font-size:15px;font-weight:900;text-align:center}
 .orderCount{font-size:11px;color:#aaa093;margin-top:2px;text-align:center}
 .docketBox{display:none;width:min(940px,92vw);margin:18px auto;padding:18px;border:1px solid #665883;
@@ -159,7 +159,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 @media(max-width:1100px){
   #stage{width:70vw}
   #bottom{width:62vw}
-  .actionRow{grid-template-columns:120px 1fr 1.45fr 120px;gap:6px}
+  .actionRow{grid-template-columns:110px 110px 1fr 1.25fr 105px;gap:6px}
   .btn{height:46px;font-size:12px}
   #shortcutBox{width:145px}
   #viewBox{width:160px}
@@ -178,11 +178,13 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   #app{background:linear-gradient(180deg,#f9f1e7 0%,#f2e7d8 100%);height:100dvh;color:var(--mobile-ink)}
   .mobileOnly{display:flex}
   .corner-copy,#shortcutBox,#viewBox,#bottom{display:none!important}
-  header{top:max(8px,env(safe-area-inset-top));width:72vw;z-index:14}
+  header{top:max(8px,env(safe-area-inset-top));width:54vw;z-index:14}
   .brand{font-size:17px;letter-spacing:.06em;color:#3b332d}
   .counter{font-size:12px;color:#796d63;margin-top:2px}
   .subline{font-size:9px;color:#a3978a;margin-top:1px}
   #mobileMenuBtn{position:absolute;z-index:20;right:13px;top:max(11px,calc(env(safe-area-inset-top) + 3px));width:43px;height:43px;border-radius:15px;border:1px solid #dfd1c0;background:#fff9ef;color:#55483d;font-size:21px;align-items:center;justify-content:center;box-shadow:0 8px 22px #8c766326}
+  #installTopBtn{position:absolute;z-index:20;left:13px;top:max(11px,calc(env(safe-area-inset-top) + 3px));height:43px;min-width:64px;padding:0 12px;border-radius:15px;border:1px solid #dfd1c0;background:#fff9ef;color:#7b4d48;font-size:12px;font-weight:950;align-items:center;justify-content:center;box-shadow:0 8px 22px #8c766326}
+  #installTopBtn:active{transform:translateY(1px)}
   #stage{left:12px;right:12px;top:74px;bottom:178px;transform:none;width:auto;border:1px solid #dccfbe;border-radius:22px;background:#191817;box-shadow:0 16px 38px #5f4e3d24;touch-action:none}
   #stage.state-keep{border-color:#b7837e;box-shadow:0 0 0 2px #9d645f33,0 16px 38px #5f4e3d24}
   #stage.state-hold{border-color:#cbb071;box-shadow:0 0 0 2px #d8bd8644,0 16px 38px #5f4e3d24}
@@ -201,6 +203,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   .quickBtn,.quickLoad{height:52px;border:1px solid #dfd2c2;background:#fffaf2;color:#5e5147;border-radius:17px;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 7px 18px #7b67541a}
   .quickBtn{width:54px;font-size:21px}
   .quickLoad{flex:1;font-size:13px}
+  .driveLoad{background:#eef4fb;border-color:#cad9e9;color:#3f5f80}
   #verdictPanel{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));transform:none;width:auto;grid-template-columns:1fr 1fr 1fr;gap:8px;z-index:17}
   #verdictPanel .btn{height:88px;border:0;border-radius:22px;color:#fff;display:grid;grid-template-rows:56px auto;gap:0;padding:5px 4px 7px;box-shadow:0 10px 24px #74604d22;overflow:hidden}
   #verdictPanel .btn img{width:78px;height:56px;object-fit:contain;justify-self:center;filter:drop-shadow(0 2px 2px #0002)}
@@ -232,7 +235,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   .resultTitle{font-size:19px}
   .resultTopBtns .btn{background:#fffaf2;color:#51463d;border-color:#dfd2c3;border-radius:14px}
   .orderBox,.docketBox{width:calc(100% - 24px);background:#fffaf2;color:#3d352e;border-color:#dfd2c3;border-radius:20px;box-shadow:none;padding:16px 12px}
-  .orderMain{font-size:21px}.orderRows{gap:8px}.orderRow{grid-template-columns:1fr 92px 92px;gap:6px}.orderRow.plenaryRow{grid-template-columns:1fr 190px}
+  .orderMain{font-size:21px}.orderRows{gap:8px}.orderRow{grid-template-columns:1fr;gap:6px}.orderRow.plenaryRow{grid-template-columns:1fr}
   .orderText{font-size:13px}.orderCount{font-size:10px}.btn{border-radius:14px}
   .resultWrap{width:calc(100% - 20px);margin-top:14px}.group{margin-bottom:22px}.grid{grid-template-columns:repeat(3,1fr);gap:6px}.card{border-radius:12px;background:#fffaf2;border-color:#e2d6c8}.card img{height:108px;border-radius:8px;background:#ece5db}.cardName{color:#887b70}
   .finishSheet{position:fixed;inset:0;z-index:95;display:none;align-items:flex-end;justify-content:center}
@@ -266,16 +269,19 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진품질판정원</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div class="subline">MOBILE v1.2 · GO / HOLD / DROP</div>
+    <div class="subline">MOBILE v1.4 · GO / HOLD / DROP</div>
   </header>
 
 
+  <button id="installTopBtn" class="mobileOnly" type="button">앱 설치</button>
   <button id="mobileMenuBtn" class="mobileOnly iconBtn" aria-label="메뉴">☰</button>
   <div id="mobileDrawer" class="mobileOnly drawer" aria-hidden="true">
     <div class="drawerBackdrop" data-close-drawer></div>
     <div class="drawerPanel">
       <div class="drawerHead"><div><strong>사진품질판정원</strong><span>Mobile</span></div><button class="drawerClose" data-close-drawer>×</button></div>
       <div class="drawerMascots"><img src="./GO.png" alt="배곰이와 곰톨이"></div>
+      <button id="mInstallApp" class="drawerItem"><b>앱으로 설치하기</b><span>홈 화면 아이콘으로 바로 실행</span></button>
+      <button id="mDriveImport" class="drawerItem"><b>Google Drive에서 불러오기</b><span>Drive 검색 · 이미지 여러 장 선택</span></button>
       <button id="mHistory" class="drawerItem"><b>History</b><span>판결 결과 모아보기</span></button>
       <button id="mReview" class="drawerItem"><b>Review</b><span>미검수 사진부터 보기</span></button>
       <button id="mExport" class="drawerItem"><b>Export</b><span>판정표 CSV 저장</span></button>
@@ -286,18 +292,19 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <label class="drawerToggle"><span>버튼 진동</span><input id="mOptVibrate" type="checkbox" checked></label>
       <button id="mSaveRoot" class="drawerItem"><b>정리 폴더 선택</b><span>GO / HOLD / DROP 저장 위치 지정</span></button>
       <button id="mEndTrial" class="drawerDanger">현재 재판 종결</button>
-      <div class="drawerFoot">사진은 서버로 업로드하지 않고 이 기기에서만 불러옵니다.</div>
+      <div class="drawerFoot">내 폰 사진은 서버로 업로드하지 않습니다. Drive 사진은 사용자가 선택한 파일만 Google에서 직접 불러옵니다.</div>
     </div>
   </div>
 
   <div id="mobileQuick" class="mobileOnly">
     <button id="mPrev" class="quickBtn">←</button>
-    <label for="picker" class="quickLoad">사진 불러오기</label>
+    <label for="picker" class="quickLoad">내 폰</label>
+    <button id="mDrive" class="quickLoad driveLoad" type="button">Drive</button>
     <button id="mNext" class="quickBtn">→</button>
   </div>
 
   <div id="stage">
-    <div id="empty"><strong>사진을 왕창 넣어보시오.</strong>자동판정 없음 · 분석 없음 · 그냥 빠르게 보고 고른다.</div>
+    <div id="empty"><strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive · 자동판정 없음 · 직접 보고 고른다.</div>
     <img id="photo" alt="">
     <div id="resume"></div>
     <div id="nameTag"></div>
@@ -329,7 +336,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <section id="bottom">
     <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · 미검수 <b id="cNone">0</b></div>
     <div class="actionRow">
-      <label for="picker" class="btn">사진 왕창 넣기</label>
+      <label for="picker" class="btn">내 컴퓨터</label>
+      <button id="driveImportBtn" class="btn">Google Drive</button>
       <button id="unreviewedBtn" class="btn">아직 안 본 놈 어디갔노</button>
       <button id="submitBtn" class="btn submit">주문, 다음과 같이 판결한다.</button>
       <button id="endTrialBtn" class="btn">재판 종결!</button>
@@ -384,18 +392,12 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
     <div class="orderRows">
       <div class="orderRow">
         <div><div class="orderText">제1항 · GO</div><div class="orderCount" id="orderKeepCount">0장</div></div>
-        <button id="appealKeep" class="btn smallBtn">항소</button>
-        <button id="acceptKeep" class="btn keep smallBtn">승낙</button>
       </div>
       <div class="orderRow">
         <div><div class="orderText">제2항 · HOLD</div><div class="orderCount" id="orderHoldCount">0장</div></div>
-        <button id="appealHold" class="btn smallBtn">항소</button>
-        <button id="acceptHold" class="btn hold smallBtn">승낙</button>
       </div>
       <div class="orderRow">
         <div><div class="orderText">제3항 · DROP</div><div class="orderCount" id="orderKillCount">0장</div></div>
-        <button id="appealKill" class="btn smallBtn">항소</button>
-        <button id="acceptKill" class="btn kill smallBtn">승낙</button>
       </div>
     </div>
   </div>
@@ -419,6 +421,12 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 <script>
 (()=>{
 'use strict';
+const DRIVE_CONFIG={
+  apiKey:'AIzaSyB7FnjnJLHvX5vj9uJM8PJ6RMq5ILAxADE',
+  clientId:'834472425142-7qpbdu9809cnnnau15hh1ufdojvdbrc3.apps.googleusercontent.com',
+  appId:'834472425142',
+  scope:'https://www.googleapis.com/auth/drive.file'
+};
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 const counter=$('#counter'), nameTag=$('#nameTag'), resume=$('#resume'), toast=$('#toast'), filmstrip=$('#filmstrip'), recordBadge=$('#recordBadge'), recordText=$('#recordText');
@@ -429,6 +437,7 @@ let reviewMode=null, reviewIndices=null;
 let resultThumbUrls=[];
 let verdictRootHandle=null;
 let saveBusy=false;
+let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false;
 const CACHE_LIMIT=9;
 const SESSION_KEY='photoCourt.v2.3.session';
 const RECORD_KEY='photoCourt.records.v1';
@@ -582,7 +591,7 @@ function clearResultThumbUrls(){
   resultThumbUrls=[];
 }
 function setAcceptButtonsDisabled(disabled){
-  ['#acceptKeep','#acceptHold','#acceptKill'].forEach(sel=>{
+  ['#finishFolders','#resetSaveRoot'].forEach(sel=>{
     const b=$(sel); if(b) b.disabled=disabled;
   });
 }
@@ -785,17 +794,13 @@ async function endTrialAndReset(){
 
   results.classList.remove('show');
   $('#docketBox').classList.remove('show');
-  ['#acceptKeep','#acceptHold','#acceptKill'].forEach(sel=>{
-    const b=$(sel); if(b){b.disabled=false;b.textContent='승낙';delete b.dataset.accepted;}
-  });
-
   photo.removeAttribute('src');
   photo.style.display='none';
   photo.style.transform='';
   photo.style.left='';
   photo.style.top='';
   empty.style.display='block';
-  empty.innerHTML='<strong>사진을 왕창 넣어보시오.</strong>자동판정 없음 · 분석 없음 · 그냥 빠르게 보고 고른다.';
+  empty.innerHTML='<strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive · 자동판정 없음 · 직접 보고 고른다.';
   nameTag.textContent='';nameTag.style.display='none';
   resume.textContent='';resume.style.display='none';
   filmstrip.innerHTML='';filmstrip.style.display='none';
@@ -805,15 +810,14 @@ async function endTrialAndReset(){
   [keepBtn,holdBtn,killBtn].forEach(b=>b.classList.remove('active'));
   stage.classList.remove('state-keep','state-hold','state-kill');
   $('#zoomBadge').textContent='맞춤 보기 · 휠 확대 · 드래그 이동';
-  showToast('재판 종결! 기록은 보관합니다.');
+  showToast('판정 종료 · 기록은 보관합니다.');
 }
 $('#endTrialBtn').onclick=endTrialAndReset;
 
-picker.addEventListener('change',e=>{
+async function ingestFiles(incoming, sourceLabel='기기'){
   clearCache(); reviewIndices=null; reviewMode=null;
-  const incoming=Array.from(e.target.files||[]).filter(isImage).sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}));
-  // 같은 파일을 다시 고르는 것도 change가 뜨게 파일 입력칸은 즉시 비운다.
-  e.target.value='';
+  incoming=Array.from(incoming||[]).filter(isImage).sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}));
+  if(!incoming.length){showToast(`${sourceLabel} · 불러올 이미지가 없습니다.`);return;}
 
   priorAtImport.clear();
   const repeatKeys=new Set();
@@ -828,24 +832,156 @@ picker.addEventListener('change',e=>{
   if(repeatKeys.size>0){
     const ok=confirm(`마! 니 이거 안봤었나?\n\n전에 재판받은 사진이 ${repeatKeys.size}장 있습니다.\n그래도 사건에 포함할겨?\n\n[확인] 포함 · [취소] 재범은 빼기`);
     files=ok ? incoming : incoming.filter(f=>!repeatKeys.has(keyOf(f)));
-    if(!ok){
-      // 제외한 재범은 현재 사건에서 표시할 필요가 없다.
-      for(const k of repeatKeys) priorAtImport.delete(k);
-    }
+    if(!ok){for(const k of repeatKeys) priorAtImport.delete(k);}
   }else{
     files=incoming;
   }
 
   idx=0;finishShown=false;closeFinishSheet();
-  empty.innerHTML='<strong>사진을 왕창 넣어보시오.</strong>자동판정 없음 · 분석 없음 · 그냥 빠르게 보고 고른다.';
+  empty.innerHTML='<strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive · 자동판정 없음 · 직접 보고 고른다.';
   const restored=restoreSessionForFiles();
   render();
   if(repeatKeys.size>0 && files.length>0){
-    setTimeout(()=>showToast(`전과조회 완료 · 재범 ${repeatKeys.size}장.`),80);
+    setTimeout(()=>showToast(`${sourceLabel} · 전과조회 완료 · 재범 ${repeatKeys.size}장`),80);
   }else if(restored>0){
-    showToast(`지난 판결 ${restored}장 복구.`);
+    showToast(`${sourceLabel} · 지난 판결 ${restored}장 복구`);
+  }else{
+    showToast(`${sourceLabel} · ${files.length}장 불러옴`);
   }
+}
+
+picker.addEventListener('change',e=>{
+  const incoming=Array.from(e.target.files||[]);
+  e.target.value='';
+  ingestFiles(incoming,'내 폰');
 });
+
+function loadExternalScript(id,src,readyCheck){
+  if(readyCheck && readyCheck()) return Promise.resolve();
+  const old=document.getElementById(id);
+  if(old){
+    return new Promise((resolve,reject)=>{
+      if(readyCheck && readyCheck()) return resolve();
+      old.addEventListener('load',()=>resolve(),{once:true});
+      old.addEventListener('error',()=>reject(new Error(`${id} 로드 실패`)),{once:true});
+    });
+  }
+  return new Promise((resolve,reject)=>{
+    const sc=document.createElement('script');sc.id=id;sc.src=src;sc.async=true;sc.defer=true;
+    sc.onload=()=>resolve();sc.onerror=()=>reject(new Error(`${id} 로드 실패`));document.head.appendChild(sc);
+  });
+}
+
+async function initDriveLibraries(){
+  if(driveLibPromise) return driveLibPromise;
+  driveLibPromise=(async()=>{
+    await Promise.all([
+      loadExternalScript('google-api-js','https://apis.google.com/js/api.js',()=>!!window.gapi),
+      loadExternalScript('google-gis-js','https://accounts.google.com/gsi/client',()=>!!(window.google?.accounts?.oauth2))
+    ]);
+    await new Promise((resolve,reject)=>{
+      try{gapi.load('picker',{callback:resolve,onerror:()=>reject(new Error('Google Picker 초기화 실패'))});}
+      catch(e){reject(e);}
+    });
+    driveTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:DRIVE_CONFIG.clientId,
+      scope:DRIVE_CONFIG.scope,
+      callback:()=>{}
+    });
+  })();
+  try{return await driveLibPromise;}catch(e){driveLibPromise=null;throw e;}
+}
+
+function setDriveBusy(busy){
+  driveBusy=busy;
+  for(const sel of ['#mDrive','#mDriveImport','#driveImportBtn']){
+    const b=$(sel);if(!b)continue;b.disabled=busy;
+    if(sel==='#mDrive') b.textContent=busy?'불러오는 중…':'Drive';
+  }
+}
+
+async function openGoogleDrive(){
+  if(driveBusy)return;
+  setDriveBusy(true);
+  try{
+    showToast('Google Drive 연결 중…');
+    await initDriveLibraries();
+    driveTokenClient.callback=(resp)=>{
+      if(resp?.error){setDriveBusy(false);alert('Google 로그인에 실패했습니다: '+resp.error);return;}
+      driveAccessToken=resp.access_token;
+      setDriveBusy(false);
+      createDrivePicker();
+    };
+    driveTokenClient.requestAccessToken({prompt:driveAccessToken?'':'consent'});
+  }catch(err){
+    setDriveBusy(false);
+    alert('Google Drive 연결 중 문제가 생겼습니다.\n\n'+err.message+'\n\nOAuth 앱이 테스트 중이면 현재 Google 계정을 테스트 사용자에 추가했는지 확인해 주세요.');
+  }
+}
+
+function createDrivePicker(){
+  if(!driveAccessToken || !window.google?.picker){alert('Google Drive 인증이 준비되지 않았습니다.');return;}
+  const view=new google.picker.DocsView(google.picker.ViewId.DOCS);
+  view.setMimeTypes('image/jpeg,image/png,image/webp,image/gif,image/bmp');
+  const p=new google.picker.PickerBuilder()
+    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+    .setDeveloperKey(DRIVE_CONFIG.apiKey)
+    .setAppId(DRIVE_CONFIG.appId)
+    .setOAuthToken(driveAccessToken)
+    .setOrigin(window.location.origin)
+    .setLocale('ko')
+    .setTitle('Google Drive 사진 선택')
+    .addView(view)
+    .setCallback(drivePickerCallback)
+    .build();
+  p.setVisible(true);
+}
+
+function driveDocId(doc){return doc?.id || (window.google?.picker?.Document?.ID ? doc[google.picker.Document.ID] : null);}
+function driveDocName(doc){return doc?.name || (window.google?.picker?.Document?.NAME ? doc[google.picker.Document.NAME] : null) || 'drive-image';}
+
+async function fetchDriveFile(doc){
+  const id=driveDocId(doc);if(!id)throw new Error('Drive 파일 ID가 없습니다.');
+  const headers={Authorization:`Bearer ${driveAccessToken}`};
+  const q=encodeURIComponent(id);
+  const mr=await fetch(`https://www.googleapis.com/drive/v3/files/${q}?fields=id,name,mimeType,size,modifiedTime&supportsAllDrives=true`,{headers});
+  if(!mr.ok)throw new Error(`메타데이터 ${mr.status}`);
+  const meta=await mr.json();
+  const br=await fetch(`https://www.googleapis.com/drive/v3/files/${q}?alt=media&supportsAllDrives=true`,{headers});
+  if(!br.ok)throw new Error(`${meta.name||driveDocName(doc)} 다운로드 ${br.status}`);
+  const blob=await br.blob();
+  const lm=meta.modifiedTime?Date.parse(meta.modifiedTime):Date.now();
+  return new File([blob],meta.name||driveDocName(doc),{type:meta.mimeType||blob.type||'application/octet-stream',lastModified:Number.isFinite(lm)?lm:Date.now()});
+}
+
+async function importDriveDocs(docs){
+  if(!docs.length)return;
+  setDriveBusy(true);
+  const out=new Array(docs.length),errors=[];
+  let cursor=0,done=0;
+  async function worker(){
+    while(true){
+      const i=cursor++;if(i>=docs.length)return;
+      try{out[i]=await fetchDriveFile(docs[i]);}
+      catch(e){errors.push(`${driveDocName(docs[i])}: ${e.message}`);}
+      finally{done++;showToast(`Drive · ${done}/${docs.length} 내려받는 중`);}
+    }
+  }
+  try{
+    await Promise.all(Array.from({length:Math.min(3,docs.length)},()=>worker()));
+    const ok=out.filter(Boolean);
+    if(ok.length) await ingestFiles(ok,'Google Drive');
+    if(errors.length) alert(`Drive에서 ${errors.length}장을 불러오지 못했습니다.\n\n${errors.slice(0,5).join('\n')}${errors.length>5?'\n…':''}`);
+  }finally{setDriveBusy(false);}
+}
+
+function drivePickerCallback(data){
+  if(data?.action===google.picker.Action.PICKED){
+    const docs=data[google.picker.Response.DOCUMENTS]||[];
+    importDriveDocs(docs);
+  }
+}
+
 keepBtn.onclick=()=>decide('keep');
 holdBtn.onclick=()=>decide('hold');
 killBtn.onclick=()=>decide('kill');
@@ -944,61 +1080,10 @@ function openResults(){
 $('#submitBtn').onclick=openResults;
 $('#backBtn').onclick=()=>{clearResultThumbUrls();results.classList.remove('show');};
 
-function startAppeal(st,label){
-  const rows=rowsBy(st);
-  if(!rows.length){alert('항소할 사진이 없습니다.');return;}
-  clearResultThumbUrls(); reviewIndices=rows.map(x=>x.i); reviewMode=label; idx=0; results.classList.remove('show'); clearCache(); render();
-  showToast('항소가 제기되었습니다.');
-}
-$('#appealKeep').onclick=()=>startAppeal('keep','제1항 항소심');
-$('#appealHold').onclick=()=>startAppeal('hold','제2항 항소심');
-$('#appealKill').onclick=()=>startAppeal('kill','제3항 항소심');
-
-async function saveRows(rows,folderName,button){
-  if(!rows.length){alert('승낙할 사진이 없습니다.');return;}
-  if(saveBusy) return;
-
-  const root=await getVerdictRootHandle();
-  if(!root) return;
-
-  saveBusy=true;
-  setAcceptButtonsDisabled(true);
-  const oldText=button ? button.textContent : '';
-  if(button) button.textContent='승낙 처리 중…';
-  try{
-    const dir=await root.getDirectoryHandle(folderName,{create:true});
-    for(const x of rows){
-      const f=x.f;
-      const handle=await dir.getFileHandle(f.name,{create:true});
-      const writable=await handle.createWritable();
-      await writable.write(f);
-      await writable.close();
-    }
-    if(button){
-      button.textContent='승낙됨';
-      button.dataset.accepted='1';
-    }
-    alert(`승낙 완료 · ${folderName} ${rows.length}장
-
-같은 저장소를 계속 사용합니다.
-원본은 그대로입니다.`);
-  }catch(err){
-    if(button) button.textContent=oldText || '승낙';
-    alert('저장 중 문제가 생겼습니다: '+err);
-  }finally{
-    saveBusy=false;
-    setAcceptButtonsDisabled(false);
-    if(button && button.dataset.accepted==='1') button.textContent='승낙됨';
-  }
-}
-$('#acceptKeep').onclick=(e)=>saveRows(rowsBy('keep'),'GO',e.currentTarget);
-$('#acceptHold').onclick=(e)=>saveRows(rowsBy('hold'),'HOLD',e.currentTarget);
-$('#acceptKill').onclick=(e)=>saveRows(rowsBy('kill'),'DROP',e.currentTarget);
-
 $('#resetSaveRoot').onclick=()=>{
   if(saveBusy){alert('저장 처리가 끝난 뒤 다시 눌러주세요.');return;}
   verdictRootHandle=null;
-  alert('저장소 기억을 비웠습니다. 다음 승낙 때 저장 폴더를 다시 고릅니다.');
+  alert('저장소 기억을 비웠습니다. 다음 폴더 정리 때 저장 폴더를 다시 고릅니다.');
 };
 
 $('#csvBtn').onclick=()=>{
@@ -1016,6 +1101,48 @@ $('#csvBtn').onclick=()=>{
 
 window.addEventListener('beforeunload',()=>{scheduleSaveSession();clearCache();});
 
+// PWA install flow
+let deferredInstallPrompt=null;
+const installTopBtn=$('#installTopBtn');
+const installDrawerBtn=$('#mInstallApp');
+function isStandaloneMode(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function syncInstallButtons(){
+  const installed=isStandaloneMode();
+  if(installTopBtn) installTopBtn.style.display=installed?'none':'';
+  if(installDrawerBtn) installDrawerBtn.style.display=installed?'none':'';
+}
+async function requestAppInstall(){
+  if(isStandaloneMode()) return;
+  if(deferredInstallPrompt){
+    const p=deferredInstallPrompt;
+    deferredInstallPrompt=null;
+    try{
+      await p.prompt();
+      const choice=await p.userChoice;
+      if(choice && choice.outcome==='accepted'){
+        syncInstallButtons();
+        return;
+      }
+    }catch(e){}
+  }
+  alert('앱 설치 메뉴가 바로 열리지 않는 브라우저입니다.\n\n브라우저 오른쪽 위 메뉴(⋮) → “앱 설치” 또는 “홈 화면에 추가”를 눌러주세요.');
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  syncInstallButtons();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  syncInstallButtons();
+  showToast('앱 설치 완료');
+});
+if(installTopBtn) installTopBtn.onclick=requestAppInstall;
+if(installDrawerBtn) installDrawerBtn.onclick=()=>{closeDrawer();requestAppInstall();};
+syncInstallButtons();
+
 // Mobile controls / drawer
 const mobileDrawer=$('#mobileDrawer');
 function openDrawer(){ if(!mobileDrawer)return; mobileDrawer.classList.add('open'); mobileDrawer.setAttribute('aria-hidden','false'); }
@@ -1024,6 +1151,9 @@ if($('#mobileMenuBtn')) $('#mobileMenuBtn').onclick=openDrawer;
 document.querySelectorAll('[data-close-drawer]').forEach(el=>el.onclick=closeDrawer);
 if($('#mPrev')) $('#mPrev').onclick=()=>move(-1);
 if($('#mNext')) $('#mNext').onclick=()=>move(1);
+if($('#mDrive')) $('#mDrive').onclick=openGoogleDrive;
+if($('#mDriveImport')) $('#mDriveImport').onclick=()=>{closeDrawer();openGoogleDrive();};
+if($('#driveImportBtn')) $('#driveImportBtn').onclick=openGoogleDrive;
 if($('#mHistory')) $('#mHistory').onclick=()=>{closeDrawer();openResults();};
 if($('#mReview')) $('#mReview').onclick=()=>{closeDrawer();$('#unreviewedBtn').click();};
 if($('#mExport')) $('#mExport').onclick=()=>{closeDrawer();$('#csvBtn').click();};
