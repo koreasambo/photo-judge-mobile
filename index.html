@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진품질판정원 · Mobile v1.6</title>
+<title>사진품질판정원 · Mobile v1.7</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -256,6 +256,33 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
+/* ===== Drive folder browser v1.7 ===== */
+#driveFolderSheet{display:none;position:fixed;inset:0;z-index:120;background:#171614f2;color:#f3ead8;overflow:hidden}
+#driveFolderSheet.open{display:flex;flex-direction:column}
+.driveFolderHead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #403b34;background:#211f1c}
+.driveFolderTitle{min-width:0;flex:1}.driveFolderTitle strong{display:block;font-size:18px}.driveFolderTitle span{display:block;color:#a99f90;font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.driveFolderClose{width:40px;height:40px;border-radius:12px;border:1px solid #4b453d;background:#2c2924;color:#f3ead8;font-size:22px}
+.driveFolderToolbar{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;padding:10px 12px;border-bottom:1px solid #35312c;background:#1b1917}
+.driveFolderToolbar button{min-height:42px;border-radius:12px;border:1px solid #4b453d;background:#2c2924;color:#f3ead8;font-weight:900}
+.driveFolderToolbar .primary{background:#486a4f;border-color:#65856b}
+.driveFolderMeta{padding:8px 14px;font-size:11px;color:#b8ad9e;text-align:center;background:#171614}
+#driveFolderGrid{flex:1;overflow:auto;padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-content:start}
+.drivePickCard{position:relative;border:1px solid #3c3833;background:#23211e;border-radius:12px;padding:5px;min-width:0;cursor:pointer}
+.drivePickCard.selected{outline:3px solid #d7bd82;outline-offset:-3px}
+.drivePickCard img{display:block;width:100%;height:112px;object-fit:cover;border-radius:8px;background:#0b0b0b}
+.drivePickCard .driveName{font-size:10px;color:#c6bbaa;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.drivePickCard .driveCheck{position:absolute;right:9px;top:9px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0009;border:2px solid #fff8;color:#fff;font-size:13px;font-weight:950}
+.drivePickCard.selected .driveCheck{background:#486a4f}
+.driveEmptyState{grid-column:1/-1;padding:40px 16px;text-align:center;color:#aaa093}.driveEmptyState strong{display:block;color:#f3ead8;font-size:17px;margin-bottom:6px}
+@media(max-width:760px){
+ #driveFolderSheet{background:#f4ebdd;color:#332c26}
+ .driveFolderHead{background:#fffaf2;border-bottom-color:#e1d4c3;padding:calc(12px + env(safe-area-inset-top)) 12px 12px}
+ .driveFolderTitle span{color:#96887c}.driveFolderClose{background:#eee2d4;border-color:#dfd1c0;color:#5e5044}
+ .driveFolderToolbar{grid-template-columns:1fr 1fr;padding:9px 10px;background:#fff7ec;border-bottom-color:#e1d4c3}.driveFolderToolbar .primary{grid-column:1/-1;background:#596a7e;border-color:#596a7e;color:#fff}
+ .driveFolderToolbar button{background:#fffdf8;color:#51463d;border-color:#dfd2c3}.driveFolderMeta{background:#f8efe4;color:#8e8175}
+ #driveFolderGrid{padding:8px;grid-template-columns:repeat(3,1fr);gap:6px}.drivePickCard{background:#fffaf2;border-color:#e2d6c8;border-radius:10px;padding:4px}.drivePickCard img{height:104px;background:#ece5db}.drivePickCard .driveName{color:#887b70;font-size:9px}.drivePickCard .driveCheck{right:7px;top:7px;width:22px;height:22px}.driveEmptyState{color:#978a7e}.driveEmptyState strong{color:#3d352e}
+}
+
 </style>
 </head>
 <body>
@@ -267,7 +294,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진품질판정원</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div class="subline">MOBILE v1.6 · GO / HOLD / DROP</div>
+    <div class="subline">MOBILE v1.7 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -279,7 +306,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <div class="drawerHead"><div><strong>사진품질판정원</strong><span>Mobile</span></div><button class="drawerClose" data-close-drawer>×</button></div>
       <div class="drawerMascots"><img src="./GO.png" alt="배곰이와 곰톨이"></div>
       <button id="mInstallApp" class="drawerItem"><b>앱으로 설치하기</b><span>홈 화면 아이콘으로 바로 실행</span></button>
-      <button id="mDriveImport" class="drawerItem"><b>Google Drive에서 불러오기</b><span>Drive 검색 · 이미지 여러 장 선택</span></button>
+      <button id="mDriveImport" class="drawerItem"><b>Google Drive 폴더 불러오기</b><span>폴더 선택 · 전체선택 · 사진 일괄 판정</span></button>
       <button id="mHistory" class="drawerItem"><b>History</b><span>판결 결과 모아보기</span></button>
       <button id="mReview" class="drawerItem"><b>Review</b><span>미검수 사진부터 보기</span></button>
       <button id="mExport" class="drawerItem"><b>Export</b><span>판정표 CSV 저장</span></button>
@@ -290,19 +317,19 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <label class="drawerToggle"><span>버튼 진동</span><input id="mOptVibrate" type="checkbox" checked></label>
       <button id="mSaveRoot" class="drawerItem"><b>정리 폴더 선택</b><span>GO / HOLD / DROP 저장 위치 지정</span></button>
       <button id="mEndTrial" class="drawerDanger">현재 재판 종결</button>
-      <div class="drawerFoot">내 폰 사진은 서버로 업로드하지 않습니다. Drive 사진은 사용자가 선택한 파일만 Google에서 직접 불러옵니다.</div>
+      <div class="drawerFoot">내 폰 사진은 서버로 업로드하지 않습니다. Drive 사진은 사용자가 선택한 폴더에서 직접 고른 사진만 Google에서 불러옵니다.</div>
     </div>
   </div>
 
   <div id="mobileQuick" class="mobileOnly">
     <button id="mPrev" class="quickBtn">←</button>
     <label for="picker" class="quickLoad">내 폰</label>
-    <button id="mDrive" class="quickLoad driveLoad" type="button">Drive</button>
+    <button id="mDrive" class="quickLoad driveLoad" type="button">Drive 폴더</button>
     <button id="mNext" class="quickBtn">→</button>
   </div>
 
   <div id="stage">
-    <div id="empty"><strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive · 자동판정 없음 · 직접 보고 고른다.</div>
+    <div id="empty"><strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive 폴더 · 자동판정 없음 · 직접 보고 고른다.</div>
     <img id="photo" alt="">
     <div id="resume"></div>
     <div id="nameTag"></div>
@@ -335,7 +362,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
     <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · 미검수 <b id="cNone">0</b></div>
     <div class="actionRow">
       <label for="picker" class="btn">내 컴퓨터</label>
-      <button id="driveImportBtn" class="btn">Google Drive</button>
+      <button id="driveImportBtn" class="btn">Drive 폴더</button>
       <button id="unreviewedBtn" class="btn">아직 안 본 놈 어디갔노</button>
       <button id="submitBtn" class="btn submit">주문, 다음과 같이 판결한다.</button>
       <button id="endTrialBtn" class="btn">재판 종결!</button>
@@ -372,6 +399,20 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
     </div>
     <div class="finishHint">원본 사진은 지우거나 이동하지 않습니다. 선택한 폴더에 판정별 복사본을 만듭니다.</div>
   </section>
+</div>
+
+<div id="driveFolderSheet" aria-hidden="true">
+  <div class="driveFolderHead">
+    <div class="driveFolderTitle"><strong>Drive 폴더 사진</strong><span id="driveFolderName">폴더를 선택하세요</span></div>
+    <button id="driveFolderClose" class="driveFolderClose" type="button" aria-label="닫기">×</button>
+  </div>
+  <div class="driveFolderToolbar">
+    <button id="driveSelectAll" type="button">전체선택</button>
+    <button id="driveSelectNone" type="button">전체해제</button>
+    <button id="driveImportSelected" class="primary" type="button">선택한 사진 불러오기</button>
+  </div>
+  <div id="driveFolderMeta" class="driveFolderMeta">0장 · 0장 선택</div>
+  <div id="driveFolderGrid"><div class="driveEmptyState"><strong>Drive 폴더를 선택하세요.</strong>폴더 안 사진을 여기서 전체선택할 수 있습니다.</div></div>
 </div>
 
 <div id="results">
@@ -436,6 +477,7 @@ let resultThumbUrls=[];
 let verdictRootHandle=null;
 let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
+let driveFolderFiles=[], driveFolderSelected=new Set(), driveFolderCurrent=null;
 const CACHE_LIMIT=9;
 const SESSION_KEY='photoCourt.v2.3.session';
 const RECORD_KEY='photoCourt.records.v1';
@@ -798,7 +840,7 @@ async function endTrialAndReset(){
   photo.style.left='';
   photo.style.top='';
   empty.style.display='block';
-  empty.innerHTML='<strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive · 자동판정 없음 · 직접 보고 고른다.';
+  empty.innerHTML='<strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive 폴더 · 자동판정 없음 · 직접 보고 고른다.';
   nameTag.textContent='';nameTag.style.display='none';
   resume.textContent='';resume.style.display='none';
   filmstrip.innerHTML='';filmstrip.style.display='none';
@@ -836,7 +878,7 @@ async function ingestFiles(incoming, sourceLabel='기기'){
   }
 
   idx=0;finishShown=false;closeFinishSheet();
-  empty.innerHTML='<strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive · 자동판정 없음 · 직접 보고 고른다.';
+  empty.innerHTML='<strong>사진을 불러오시오.</strong>내 폰 또는 Google Drive 폴더 · 자동판정 없음 · 직접 보고 고른다.';
   const restored=restoreSessionForFiles();
   render();
   if(repeatKeys.size>0 && files.length>0){
@@ -895,7 +937,7 @@ function updateDriveButtons(){
     const b=$(sel);if(!b)continue;
     b.disabled=driveBusy;
     if(sel==='#mDrive'){
-      b.textContent=driveBusy?'불러오는 중…':(driveReady?'Drive':'Drive 준비중');
+      b.textContent=driveBusy?'불러오는 중…':(driveReady?'Drive 폴더':'Drive 준비중');
     }
   }
 }
@@ -950,16 +992,17 @@ function openGoogleDrive(){
 
 function createDrivePicker(){
   if(!driveAccessToken || !window.google?.picker){alert('Google Drive 인증이 준비되지 않았습니다.');return;}
-  const view=new google.picker.DocsView(google.picker.ViewId.DOCS);
-  view.setMimeTypes('image/jpeg,image/png,image/webp,image/gif,image/bmp');
+  const view=new google.picker.DocsView(google.picker.ViewId.FOLDERS);
+  view.setIncludeFolders(true);
+  view.setSelectFolderEnabled(true);
+  view.setEnableDrives(true);
   const p=new google.picker.PickerBuilder()
-    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
     .setDeveloperKey(DRIVE_CONFIG.apiKey)
     .setAppId(DRIVE_CONFIG.appId)
     .setOAuthToken(driveAccessToken)
     .setOrigin(window.location.origin)
     .setLocale('ko')
-    .setTitle('Google Drive 사진 선택')
+    .setTitle('사진이 들어있는 Drive 폴더 선택')
     .addView(view)
     .setCallback(drivePickerCallback)
     .build();
@@ -967,49 +1010,133 @@ function createDrivePicker(){
 }
 
 function driveDocId(doc){return doc?.id || (window.google?.picker?.Document?.ID ? doc[google.picker.Document.ID] : null);}
-function driveDocName(doc){return doc?.name || (window.google?.picker?.Document?.NAME ? doc[google.picker.Document.NAME] : null) || 'drive-image';}
+function driveDocName(doc){return doc?.name || (window.google?.picker?.Document?.NAME ? doc[google.picker.Document.NAME] : null) || 'Drive 폴더';}
+function driveDocMime(doc){return doc?.mimeType || (window.google?.picker?.Document?.MIME_TYPE ? doc[google.picker.Document.MIME_TYPE] : null) || '';}
 
 async function fetchDriveFile(doc){
-  const id=driveDocId(doc);if(!id)throw new Error('Drive 파일 ID가 없습니다.');
+  const id=driveDocId(doc)||doc?.id;if(!id)throw new Error('Drive 파일 ID가 없습니다.');
   const headers={Authorization:`Bearer ${driveAccessToken}`};
   const q=encodeURIComponent(id);
-  const mr=await fetch(`https://www.googleapis.com/drive/v3/files/${q}?fields=id,name,mimeType,size,modifiedTime&supportsAllDrives=true`,{headers});
-  if(!mr.ok)throw new Error(`메타데이터 ${mr.status}`);
-  const meta=await mr.json();
+  const meta=doc?.mimeType?doc:null;
+  let name=doc?.name||'drive-image', mime=doc?.mimeType||'', modifiedTime=doc?.modifiedTime||null;
+  if(!mime){
+    const mr=await fetch(`https://www.googleapis.com/drive/v3/files/${q}?fields=id,name,mimeType,size,modifiedTime&supportsAllDrives=true`,{headers});
+    if(!mr.ok)throw new Error(`메타데이터 ${mr.status}`);
+    const m=await mr.json();name=m.name||name;mime=m.mimeType||mime;modifiedTime=m.modifiedTime||modifiedTime;
+  }
   const br=await fetch(`https://www.googleapis.com/drive/v3/files/${q}?alt=media&supportsAllDrives=true`,{headers});
-  if(!br.ok)throw new Error(`${meta.name||driveDocName(doc)} 다운로드 ${br.status}`);
+  if(!br.ok)throw new Error(`${name} 다운로드 ${br.status}`);
   const blob=await br.blob();
-  const lm=meta.modifiedTime?Date.parse(meta.modifiedTime):Date.now();
-  return new File([blob],meta.name||driveDocName(doc),{type:meta.mimeType||blob.type||'application/octet-stream',lastModified:Number.isFinite(lm)?lm:Date.now()});
+  const lm=modifiedTime?Date.parse(modifiedTime):Date.now();
+  return new File([blob],name,{type:mime||blob.type||'application/octet-stream',lastModified:Number.isFinite(lm)?lm:Date.now()});
 }
 
-async function importDriveDocs(docs){
-  if(!docs.length)return;
-  setDriveBusy(true);
-  const out=new Array(docs.length),errors=[];
-  let cursor=0,done=0;
+async function listDriveFolderImages(folderId){
+  if(!driveAccessToken)throw new Error('Drive 로그인이 필요합니다.');
+  const headers={Authorization:`Bearer ${driveAccessToken}`};
+  const all=[];let pageToken='';
+  do{
+    const params=new URLSearchParams({
+      q:`'${folderId}' in parents and trashed = false and mimeType contains 'image/'`,
+      fields:'nextPageToken,files(id,name,mimeType,size,modifiedTime,thumbnailLink,iconLink,imageMediaMetadata(width,height))',
+      pageSize:'1000',
+      orderBy:'name',
+      spaces:'drive',
+      supportsAllDrives:'true',
+      includeItemsFromAllDrives:'true'
+    });
+    if(pageToken)params.set('pageToken',pageToken);
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?${params.toString()}`,{headers});
+    if(!r.ok){
+      let extra='';try{extra=(await r.json())?.error?.message||'';}catch{}
+      throw new Error(`폴더 사진 목록 ${r.status}${extra?` · ${extra}`:''}`);
+    }
+    const data=await r.json();all.push(...(data.files||[]));pageToken=data.nextPageToken||'';
+  }while(pageToken);
+  return all;
+}
+
+function openDriveFolderSheet(folder,items){
+  driveFolderCurrent=folder;driveFolderFiles=items;driveFolderSelected=new Set(items.map(x=>x.id));
+  const sheet=$('#driveFolderSheet');sheet.classList.add('open');sheet.setAttribute('aria-hidden','false');
+  $('#driveFolderName').textContent=`${folder.name||'선택한 폴더'} · ${items.length}장`;
+  renderDriveFolderGrid();
+}
+function closeDriveFolderSheet(){
+  const sheet=$('#driveFolderSheet');sheet.classList.remove('open');sheet.setAttribute('aria-hidden','true');
+}
+function updateDriveFolderMeta(){
+  const total=driveFolderFiles.length, selected=driveFolderSelected.size;
+  $('#driveFolderMeta').textContent=`${total}장 · ${selected}장 선택`;
+  const btn=$('#driveImportSelected');if(btn)btn.textContent=selected?`선택한 ${selected}장 불러오기`:'사진을 선택하세요';
+  if(btn)btn.disabled=!selected;
+}
+function renderDriveFolderGrid(){
+  const grid=$('#driveFolderGrid');
+  if(!driveFolderFiles.length){grid.innerHTML='<div class="driveEmptyState"><strong>이 폴더에는 이미지가 없습니다.</strong>다른 폴더를 선택해 주세요.</div>';updateDriveFolderMeta();return;}
+  grid.innerHTML='';
+  for(const item of driveFolderFiles){
+    const card=document.createElement('div');card.className='drivePickCard'+(driveFolderSelected.has(item.id)?' selected':'');card.dataset.id=item.id;
+    const img=document.createElement('img');img.alt=item.name||'';img.loading='lazy';
+    if(item.thumbnailLink)img.src=item.thumbnailLink;else if(item.iconLink)img.src=item.iconLink;
+    const ck=document.createElement('div');ck.className='driveCheck';ck.textContent=driveFolderSelected.has(item.id)?'✓':'';
+    const nm=document.createElement('div');nm.className='driveName';nm.textContent=item.name||'image';
+    card.append(img,ck,nm);
+    card.onclick=()=>{
+      if(driveFolderSelected.has(item.id))driveFolderSelected.delete(item.id);else driveFolderSelected.add(item.id);
+      card.classList.toggle('selected',driveFolderSelected.has(item.id));ck.textContent=driveFolderSelected.has(item.id)?'✓':'';updateDriveFolderMeta();
+    };
+    grid.appendChild(card);
+  }
+  updateDriveFolderMeta();
+}
+
+async function loadSelectedDriveFolderImages(){
+  const chosen=driveFolderFiles.filter(x=>driveFolderSelected.has(x.id));
+  if(!chosen.length)return;
+  setDriveBusy(true);showToast(`Drive · ${chosen.length}장 불러오는 중`);
+  const out=new Array(chosen.length),errors=[];let cursor=0,done=0;
   async function worker(){
     while(true){
-      const i=cursor++;if(i>=docs.length)return;
-      try{out[i]=await fetchDriveFile(docs[i]);}
-      catch(e){errors.push(`${driveDocName(docs[i])}: ${e.message}`);}
-      finally{done++;showToast(`Drive · ${done}/${docs.length} 내려받는 중`);}
+      const i=cursor++;if(i>=chosen.length)return;
+      try{out[i]=await fetchDriveFile(chosen[i]);}
+      catch(e){errors.push(`${chosen[i].name||'image'}: ${e.message}`);}
+      finally{done++;showToast(`Drive · ${done}/${chosen.length} 내려받는 중`);}
     }
   }
   try{
-    await Promise.all(Array.from({length:Math.min(3,docs.length)},()=>worker()));
+    await Promise.all(Array.from({length:Math.min(3,chosen.length)},()=>worker()));
     const ok=out.filter(Boolean);
-    if(ok.length) await ingestFiles(ok,'Google Drive');
-    if(errors.length) alert(`Drive에서 ${errors.length}장을 불러오지 못했습니다.\n\n${errors.slice(0,5).join('\n')}${errors.length>5?'\n…':''}`);
+    if(ok.length){closeDriveFolderSheet();await ingestFiles(ok,`Google Drive · ${driveFolderCurrent?.name||'폴더'}`);}
+    if(errors.length)alert(`Drive에서 ${errors.length}장을 불러오지 못했습니다.\n\n${errors.slice(0,8).join('\n')}${errors.length>8?'\n…':''}`);
   }finally{setDriveBusy(false);}
+}
+
+async function handlePickedDriveFolder(doc){
+  const id=driveDocId(doc);if(!id)return;
+  const folder={id,name:driveDocName(doc),mimeType:driveDocMime(doc)};
+  setDriveBusy(true);showToast('Drive 폴더 사진 목록 읽는 중…');
+  try{
+    const items=await listDriveFolderImages(id);
+    setDriveBusy(false);openDriveFolderSheet(folder,items);
+  }catch(e){
+    setDriveBusy(false);
+    alert('선택한 폴더의 사진 목록을 읽지 못했습니다.\n\n'+e.message+'\n\n현재 drive.file 권한에서 폴더 하위 목록 접근이 제한되는 계정이라면 권한 구성을 한 단계 넓혀야 할 수 있습니다.');
+  }
 }
 
 function drivePickerCallback(data){
   if(data?.action===google.picker.Action.PICKED){
     const docs=data[google.picker.Response.DOCUMENTS]||[];
-    importDriveDocs(docs);
+    if(docs[0])handlePickedDriveFolder(docs[0]);
   }
 }
+
+const driveFolderClose=$('#driveFolderClose');if(driveFolderClose)driveFolderClose.onclick=closeDriveFolderSheet;
+const driveSelectAll=$('#driveSelectAll');if(driveSelectAll)driveSelectAll.onclick=()=>{driveFolderSelected=new Set(driveFolderFiles.map(x=>x.id));renderDriveFolderGrid();};
+const driveSelectNone=$('#driveSelectNone');if(driveSelectNone)driveSelectNone.onclick=()=>{driveFolderSelected.clear();renderDriveFolderGrid();};
+const driveImportSelected=$('#driveImportSelected');if(driveImportSelected)driveImportSelected.onclick=loadSelectedDriveFolderImages;
+
 
 keepBtn.onclick=()=>decide('keep');
 holdBtn.onclick=()=>decide('hold');

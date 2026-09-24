@@ -1,4 +1,4 @@
-const CACHE='photo-court-mobile-v1.6';
+const CACHE='photo-court-mobile-v1.7';
 const SHELL=['./index.html','./manifest.webmanifest','./GO.png','./HOLD.png','./DROP.png','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',e=>{

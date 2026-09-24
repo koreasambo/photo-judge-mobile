@@ -1,3 +1,7 @@
+사진품질판정원 MOBILE · GitHub Pages v1.7
+
+Google Drive 폴더 선택 → 앱 내부 썸네일 → 전체선택/전체해제 → 일괄 불러오기 지원.
+
 사진품질판정원 MOBILE v1.6
 
 - v1.5 Google Drive 모바일 OAuth/Picker 개선 유지
