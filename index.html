@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진품질판정원 · Mobile</title>
+<title>사진품질판정원 · Mobile v1.1</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -193,7 +193,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   #nameTag{bottom:10px;max-width:88%;border-radius:14px;font-size:10px;padding:6px 10px}
   #resume{top:10px;max-width:82%;border-radius:12px}
   #recordBadge{left:10px;top:10px;min-width:130px;padding:8px 10px;border-radius:13px}
-  #toast{font-size:19px;border-radius:18px;padding:14px 20px}
+  #toast{left:50%;top:84px;transform:translateX(-50%) translateY(-8px);max-width:82vw;font-size:13px;line-height:1.35;border-radius:15px;padding:10px 14px;white-space:normal;box-shadow:0 8px 24px #0005}
+  #toast.show{transform:translateX(-50%) translateY(0)}
   #filmstrip{left:12px;right:12px;bottom:180px;transform:none;width:auto;height:70px;border-radius:16px;justify-content:flex-start;overflow-x:auto}
   .thumb{width:74px;height:54px;flex:0 0 auto;border-radius:9px}
   #mobileQuick{position:absolute;z-index:16;left:12px;right:12px;bottom:106px;height:52px;gap:8px;align-items:center}
@@ -201,8 +202,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   .quickBtn{width:54px;font-size:21px}
   .quickLoad{flex:1;font-size:13px}
   #verdictPanel{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));transform:none;width:auto;grid-template-columns:1fr 1fr 1fr;gap:8px;z-index:17}
-  #verdictPanel .btn{height:84px;border:0;border-radius:22px;color:#fff;display:grid;grid-template-rows:45px auto;gap:1px;padding:7px 4px 8px;box-shadow:0 10px 24px #74604d22;overflow:hidden}
-  #verdictPanel .btn img{width:54px;height:44px;object-fit:contain;justify-self:center;filter:drop-shadow(0 2px 2px #0002)}
+  #verdictPanel .btn{height:88px;border:0;border-radius:22px;color:#fff;display:grid;grid-template-rows:56px auto;gap:0;padding:5px 4px 7px;box-shadow:0 10px 24px #74604d22;overflow:hidden}
+  #verdictPanel .btn img{width:78px;height:56px;object-fit:contain;justify-self:center;filter:drop-shadow(0 2px 2px #0002)}
   #verdictPanel .btn span{font-size:14px;line-height:18px;letter-spacing:.03em}
   #verdictPanel .btn small{display:none}
   #verdictPanel .keep{background:#a86f69}
@@ -234,7 +235,25 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   .orderMain{font-size:21px}.orderRows{gap:8px}.orderRow{grid-template-columns:1fr 92px 92px;gap:6px}.orderRow.plenaryRow{grid-template-columns:1fr 190px}
   .orderText{font-size:13px}.orderCount{font-size:10px}.btn{border-radius:14px}
   .resultWrap{width:calc(100% - 20px);margin-top:14px}.group{margin-bottom:22px}.grid{grid-template-columns:repeat(3,1fr);gap:6px}.card{border-radius:12px;background:#fffaf2;border-color:#e2d6c8}.card img{height:108px;border-radius:8px;background:#ece5db}.cardName{color:#887b70}
+  .finishSheet{position:fixed;inset:0;z-index:95;display:none;align-items:flex-end;justify-content:center}
+  .finishSheet.open{display:flex}
+  .finishBackdrop{position:absolute;inset:0;background:#33291f70;backdrop-filter:blur(5px)}
+  .finishPanel{position:relative;width:100%;max-width:520px;background:#fffaf2;color:#332c26;border-radius:28px 28px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px #4d3b2d30}
+  .finishHandle{width:44px;height:5px;border-radius:99px;background:#ddcfbe;margin:0 auto 12px}
+  .finishHead{display:flex;align-items:center;gap:12px}
+  .finishMascot{width:78px;height:72px;object-fit:contain;flex:0 0 auto}
+  .finishHeadText{min-width:0;flex:1}.finishTitle{font-size:21px;font-weight:950}.finishSub{font-size:11px;color:#96887c;margin-top:3px;line-height:1.4}
+  .finishClose{width:38px;height:38px;border:0;border-radius:14px;background:#eee2d4;color:#5e5044;font-size:22px}
+  .finishCounts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:13px 0}
+  .finishCount{border:1px solid #eadfd2;background:#fffdf8;border-radius:16px;padding:10px 4px;text-align:center;font-size:11px;font-weight:850}
+  .finishCount b{display:block;font-size:20px;margin-top:2px}.finishCount.go b{color:#a86f69}.finishCount.hold b{color:#a98236}.finishCount.drop b{color:#596a7e}
+  .finishActions{display:grid;gap:8px}
+  .finishAction{min-height:48px;border:1px solid #dfd2c3;background:#fffdf8;color:#40372f;border-radius:16px;font-weight:900;font-size:13px}
+  .finishAction.primary{background:#3e3730;color:#fff;border-color:#3e3730}.finishAction.folder{background:#f0e1bd;border-color:#dec58b;color:#594a34}
+  .finishActionRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .finishHint{font-size:9px;color:#a09386;line-height:1.45;text-align:center;margin-top:9px}
 }
+
 
 </style>
 </head>
@@ -247,7 +266,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진품질판정원</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div class="subline">MOBILE · GO / HOLD / DROP</div>
+    <div class="subline">MOBILE v1.1 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -265,6 +284,9 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <label class="drawerToggle"><span>파일명 표시</span><input id="mOptName" type="checkbox" checked></label>
       <label class="drawerToggle"><span>촬영정보 표시</span><input id="mOptResume" type="checkbox"></label>
       <label class="drawerToggle"><span>썸네일 보기</span><input id="mOptThumb" type="checkbox"></label>
+      <label class="drawerToggle"><span>마지막 판정 후 완료창</span><input id="mOptFinish" type="checkbox" checked></label>
+      <label class="drawerToggle"><span>버튼 진동</span><input id="mOptVibrate" type="checkbox" checked></label>
+      <button id="mSaveRoot" class="drawerItem"><b>정리 폴더 선택</b><span>GO / HOLD / DROP 저장 위치 지정</span></button>
       <button id="mEndTrial" class="drawerDanger">현재 재판 종결</button>
       <div class="drawerFoot">사진은 서버로 업로드하지 않고 이 기기에서만 불러옵니다.</div>
     </div>
@@ -325,6 +347,29 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   </div>
 
   <input id="picker" class="fileInput" type="file" multiple accept=".jpg,.jpeg,.png,.webp,.bmp,.gif,image/*">
+</div>
+
+<div id="finishSheet" class="mobileOnly finishSheet" aria-hidden="true">
+  <div class="finishBackdrop" data-close-finish></div>
+  <section class="finishPanel" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+    <div class="finishHandle"></div>
+    <div class="finishHead">
+      <img class="finishMascot" src="./GO.png" alt="배곰이와 곰톨이">
+      <div class="finishHeadText"><div id="finishTitle" class="finishTitle">판정 완료</div><div id="finishSub" class="finishSub">모든 사진을 확인했습니다.</div></div>
+      <button id="finishClose" class="finishClose" aria-label="닫기">×</button>
+    </div>
+    <div class="finishCounts">
+      <div class="finishCount go">GO<b id="finishGo">0</b></div>
+      <div class="finishCount hold">HOLD<b id="finishHold">0</b></div>
+      <div class="finishCount drop">DROP<b id="finishDrop">0</b></div>
+    </div>
+    <div class="finishActions">
+      <button id="finishResults" class="finishAction primary">결과 모아보기</button>
+      <button id="finishFolders" class="finishAction folder">GO / HOLD / DROP 폴더로 한 번에 정리</button>
+      <div class="finishActionRow"><button id="finishCsv" class="finishAction">판정표 저장</button><label for="picker" id="finishNew" class="finishAction" style="display:flex;align-items:center;justify-content:center">새 사진 불러오기</label></div>
+    </div>
+    <div class="finishHint">원본 사진은 지우거나 이동하지 않습니다. 선택한 폴더에 판정별 복사본을 만듭니다.</div>
+  </section>
 </div>
 
 <div id="results">
@@ -409,6 +454,9 @@ let saveBusy=false;
 const CACHE_LIMIT=9;
 const SESSION_KEY='photoCourt.v2.3.session';
 const RECORD_KEY='photoCourt.records.v1';
+const PREF_KEY='photoCourt.mobile.prefs.v1';
+let mobilePrefs={finish:true,vibrate:true};
+let finishShown=false;
 let saveTimer=null, recordSaveTimer=null;
 let criminalRecords=new Map(), priorAtImport=new Map();
 let fitScale=1, zoomScale=1, panX=0, panY=0, isPanning=false, panStartX=0, panStartY=0, panOriginX=0, panOriginY=0;
@@ -460,6 +508,12 @@ function statusKorean(v){
   return v==='keep'?'GO':v==='hold'?'HOLD':v==='kill'?'DROP':v==='plenary'?'REVIEW':'-';
 }
 criminalRecords=loadCriminalRecords();
+try{
+  const raw=localStorage.getItem(PREF_KEY);
+  if(raw) mobilePrefs={...mobilePrefs,...JSON.parse(raw)};
+}catch{}
+function saveMobilePrefs(){try{localStorage.setItem(PREF_KEY,JSON.stringify(mobilePrefs));}catch{}}
+function haptic(ms=12){if(mobilePrefs.vibrate && navigator.vibrate) try{navigator.vibrate(ms);}catch{}}
 
 function scheduleSaveSession(){
   clearTimeout(saveTimer);
@@ -591,7 +645,7 @@ function prefetch(){
 }
 function showToast(msg){
   clearTimeout(toastTimer); toast.textContent=msg; toast.classList.add('show');
-  toastTimer=setTimeout(()=>toast.classList.remove('show'),620);
+  toastTimer=setTimeout(()=>toast.classList.remove('show'),900);
 }
 function countStatus(){
   let k=0,h=0,d=0,p=0;
@@ -664,18 +718,54 @@ function move(delta){
   const max=(reviewIndices?reviewIndices.length:files.length)-1;
   idx=Math.max(0,Math.min(max,idx+delta)); render();
 }
+function decisionCounts(){
+  let keep=0,hold=0,kill=0,plenary=0;
+  for(const f of files){
+    const v=decisions.get(keyOf(f));
+    if(v==='keep')keep++; else if(v==='hold')hold++; else if(v==='kill')kill++; else if(v==='plenary')plenary++;
+  }
+  return {keep,hold,kill,plenary,done:keep+hold+kill+plenary,total:files.length};
+}
+function allReviewed(){const c=decisionCounts();return c.total>0 && c.done===c.total;}
+function openFinishSheet(){
+  if(!$('#finishSheet'))return;
+  const c=decisionCounts();
+  $('#finishGo').textContent=c.keep;$('#finishHold').textContent=c.hold;$('#finishDrop').textContent=c.kill;
+  $('#finishSub').textContent=c.plenary?`전체 ${c.total}장 · REVIEW ${c.plenary}장 포함`:`전체 ${c.total}장 판정 완료`;
+  $('#finishSheet').classList.add('open');$('#finishSheet').setAttribute('aria-hidden','false');finishShown=true;haptic(24);
+}
+function closeFinishSheet(){if(!$('#finishSheet'))return;$('#finishSheet').classList.remove('open');$('#finishSheet').setAttribute('aria-hidden','true');}
+async function organizeAllFolders(){
+  const root=await getVerdictRootHandle(); if(!root)return;
+  const groups=[['GO',rowsBy('keep')],['HOLD',rowsBy('hold')],['DROP',rowsBy('kill')]];
+  saveBusy=true;setAcceptButtonsDisabled(true);
+  try{
+    for(const [folderName,rows] of groups){
+      if(!rows.length)continue;
+      const dir=await root.getDirectoryHandle(folderName,{create:true});
+      for(const x of rows){const handle=await dir.getFileHandle(x.f.name,{create:true});const writable=await handle.createWritable();await writable.write(x.f);await writable.close();}
+    }
+    showToast('폴더 정리 완료 · GO / HOLD / DROP');haptic(30);
+  }catch(err){alert('폴더 정리 중 문제가 생겼습니다: '+err);}
+  finally{saveBusy=false;setAcceptButtonsDisabled(false);}
+}
 function decide(status){
   const f=currentFile(); if(!f)return;
   decisions.set(keyOf(f),status);
   criminalRecords.set(keyOf(f),status);
-  scheduleSaveRecords();
-  if(status==='keep')showToast('GO · 이 컷은 간다.');
-  if(status==='hold')showToast('HOLD · 한 번 더 보자.');
-  if(status==='kill')showToast('DROP · 여기서 정리.');
-  if(status==='plenary')showToast('국가란 국민입니다!!!!');
+  scheduleSaveRecords();haptic(12);
+  if(status==='keep')showToast('GO · 남긴다');
+  if(status==='hold')showToast('HOLD · 다시 본다');
+  if(status==='kill')showToast('DROP · 제외한다');
+  if(status==='plenary')showToast('REVIEW · 다시 검토');
   activeState(); countStatus(); scheduleSaveSession();
   const max=(reviewIndices?reviewIndices.length:files.length)-1;
-  if(idx<max) setTimeout(()=>{ idx++; render(); },125);
+  const finished=!reviewIndices && allReviewed();
+  if(finished && mobilePrefs.finish && !finishShown){
+    setTimeout(()=>{openFinishSheet();},260);
+  }else if(idx<max){
+    setTimeout(()=>{ idx++; render(); },125);
+  }
 }
 
 
@@ -704,6 +794,7 @@ async function endTrialAndReset(){
   recordBadge.classList.remove('show');
   files=[];
   idx=0;
+  finishShown=false;closeFinishSheet();
   reviewMode=null;
   reviewIndices=null;
   verdictRootHandle=null;
@@ -769,7 +860,7 @@ picker.addEventListener('change',e=>{
     files=incoming;
   }
 
-  idx=0;
+  idx=0;finishShown=false;closeFinishSheet();
   empty.innerHTML='<strong>사진을 왕창 넣어보시오.</strong>자동판정 없음 · 분석 없음 · 그냥 빠르게 보고 고른다.';
   const restored=restoreSessionForFiles();
   render();
@@ -997,6 +1088,15 @@ function bindMirror(mobileSel,desktopSel,after){
   d.addEventListener('change',()=>{m.checked=d.checked;});
 }
 bindMirror('#mOptName','#optName');bindMirror('#mOptResume','#optResume');bindMirror('#mOptThumb','#optThumb');
+if($('#mOptFinish')){ $('#mOptFinish').checked=mobilePrefs.finish; $('#mOptFinish').onchange=e=>{mobilePrefs.finish=e.target.checked;saveMobilePrefs();}; }
+if($('#mOptVibrate')){ $('#mOptVibrate').checked=mobilePrefs.vibrate; $('#mOptVibrate').onchange=e=>{mobilePrefs.vibrate=e.target.checked;saveMobilePrefs();haptic(18);}; }
+if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();verdictRootHandle=null;const h=await getVerdictRootHandle();if(h)showToast('정리 폴더 선택 완료');};
+if($('#finishClose')) $('#finishClose').onclick=closeFinishSheet;
+document.querySelectorAll('[data-close-finish]').forEach(el=>el.onclick=closeFinishSheet);
+if($('#finishResults')) $('#finishResults').onclick=()=>{closeFinishSheet();openResults();};
+if($('#finishFolders')) $('#finishFolders').onclick=()=>organizeAllFolders();
+if($('#finishCsv')) $('#finishCsv').onclick=()=>$('#csvBtn').click();
+if($('#finishNew')) $('#finishNew').onclick=()=>{closeFinishSheet();};
 
 // Basic horizontal swipe navigation on the photo stage; vertical gestures remain untouched.
 let touchStartX=0,touchStartY=0,touchStartAt=0;
