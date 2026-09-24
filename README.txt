@@ -1,3 +1,10 @@
+사진품질판정원 MOBILE v1.6
+
+- v1.5 Google Drive 모바일 OAuth/Picker 개선 유지
+- v1.6 서비스워커 강제 업데이트 및 캐시 고착 방지
+- 페이지 이동은 network-first로 최신 GitHub Pages 배포본 우선
+- Google 외부 요청은 캐시하지 않음
+
 사진품질판정원 MOBILE · GitHub Pages v1.5
 
 핵심 기능

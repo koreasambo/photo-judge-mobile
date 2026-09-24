@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진품질판정원 · Mobile v1.5</title>
+<title>사진품질판정원 · Mobile v1.6</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -267,7 +267,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진품질판정원</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div class="subline">MOBILE v1.5 · GO / HOLD / DROP</div>
+    <div class="subline">MOBILE v1.6 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -1209,7 +1209,16 @@ stage.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;touchStar
 stage.addEventListener('touchend',e=>{if(!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touchStartX;const dy=e.changedTouches[0].clientY-touchStartY;const dt=Date.now()-touchStartAt;if(dt<550&&Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.4){dx<0?move(1):move(-1);}},{passive:true});
 
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./sw.js?v=1.6',{updateViaCache:'none'});
+      await reg.update();
+      let refreshing=false;
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{
+        if(refreshing)return; refreshing=true; location.reload();
+      });
+    }catch(e){console.warn('service worker update failed',e);}
+  });
 }
 
 updateDriveButtons();
