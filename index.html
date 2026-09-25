@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3.5</title>
+<title>사진판정소 · v2.3.6</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -323,11 +323,12 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
-/* v2.3.5 import controls */
+/* v2.3.6 import controls */
 button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
 .drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
 @media (min-width:861px){
-  #verdictPanel{bottom:104px}
+  /* 판정 버튼은 하단 작업바 위에 독립적으로 떠야 한다. */
+  #verdictPanel{bottom:154px}
   #bottom{bottom:14px}
   #stage{bottom:236px}
 }
@@ -409,7 +410,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   initialSplash();
 })();
 </script>
-<audio id="godEyeAudio" src="./god_eye_bgm.mp3" preload="metadata"></audio>
+<audio id="godEyeAudio" src="./god_eye_bgm.mp3" preload="auto"></audio>
 <div id="app">
   <div id="copyLT" class="corner-copy">오늘도 많이 찍었다</div>
   <div id="copyRT" class="corner-copy">비슷해 보여도 남는 건 다르다</div>
@@ -418,7 +419,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.5 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.6 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -511,7 +512,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   </div>
 
   <input id="picker" class="fileInput" type="file" multiple accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.gif" aria-label="사진 한 장 또는 여러 장 선택">
-  <input id="folderPicker" class="fileInput" type="file" multiple webkitdirectory directory accept="image/*" aria-label="사진 폴더 선택">
+  <input id="folderPicker" class="fileInput" type="file" multiple webkitdirectory directory aria-label="사진 폴더 선택">
 </div>
 
 <div id="finishSheet" class="mobileOnly finishSheet" aria-hidden="true" style="display:none!important">
@@ -617,7 +618,7 @@ const DRIVE_CONFIG={
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 
-// v2.3.5: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// v2.3.6: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
 // 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
 // 실제 버튼에서 각각의 input.click()을 직접 호출한다.
 if(picker){
@@ -630,8 +631,44 @@ function openPhotoPicker(){
   try{ picker.value=''; }catch{}
   picker.click();
 }
-function openFolderPicker(){
-  if(!folderPicker)return;
+function attachRelativePath(file,rel){
+  try{Object.defineProperty(file,'__relativePath',{value:rel,configurable:true});}catch{try{file.__relativePath=rel;}catch{}}
+  return file;
+}
+async function collectDirectoryFiles(dirHandle,rootName){
+  const out=[];
+  async function walk(handle,prefix){
+    for await (const entry of handle.values()){
+      const rel=prefix?`${prefix}/${entry.name}`:entry.name;
+      if(entry.kind==='file'){
+        try{const f=await entry.getFile(); if(isImage(f))out.push(attachRelativePath(f,`${rootName}/${rel}`));}catch(err){console.warn('file read failed',rel,err);}
+      }else if(entry.kind==='directory'){
+        await walk(entry,rel);
+      }
+      if(out.length && out.length%250===0) await new Promise(r=>setTimeout(r,0));
+    }
+  }
+  await walk(dirHandle,'');
+  return out;
+}
+async function openFolderPicker(){
+  // 데스크톱 Chromium/PWA: File System Access API가 있으면 이 경로가 가장 안정적이다.
+  if(window.isSecureContext && typeof window.showDirectoryPicker==='function'){
+    try{
+      showToast('일터 소환 중 · 폴더를 읽고 있습니다…');
+      const handle=await window.showDirectoryPicker({mode:'read'});
+      const incoming=await collectDirectoryFiles(handle,handle.name||'선택한 폴더');
+      await ingestFiles(incoming,`일터 소환 · ${handle.name||'선택한 폴더'}`);
+      if(files.length>=1000) showToast(`대량 모드 · ${files.length.toLocaleString()}장 · 필요한 사진만 순차 로딩`);
+      return;
+    }catch(err){
+      if(err?.name==='AbortError')return;
+      console.warn('showDirectoryPicker fallback',err);
+      showToast('폴더 선택 방식을 바꿔 다시 엽니다.');
+    }
+  }
+  // Android/미지원 브라우저 폴백
+  if(!folderPicker){showToast('이 브라우저에서는 폴더 선택을 지원하지 않습니다.');return;}
   try{ folderPicker.value=''; }catch{}
   folderPicker.click();
 }
@@ -641,7 +678,7 @@ document.addEventListener('click',e=>{
   const folderBtn=e.target.closest?.('.folderPickBtn');
   if(folderBtn){ e.preventDefault(); e.stopPropagation(); openFolderPicker(); }
 });
-const FOLDER_PICK_SUPPORTED=!!folderPicker && ('webkitdirectory' in folderPicker || 'webkitdirectory' in HTMLInputElement.prototype);
+const FOLDER_PICK_SUPPORTED=(window.isSecureContext&&typeof window.showDirectoryPicker==='function') || (!!folderPicker && ('webkitdirectory' in folderPicker || 'webkitdirectory' in HTMLInputElement.prototype));
 const counter=$('#counter'), nameTag=$('#nameTag'), resume=$('#resume'), toast=$('#toast'), filmstrip=$('#filmstrip'), recordBadge=$('#recordBadge'), recordText=$('#recordText');
 const keepBtn=$('#keepBtn'), holdBtn=$('#holdBtn'), killBtn=$('#killBtn');
 const results=$('#results');
@@ -653,7 +690,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.5`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.5 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.6`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.6 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -774,7 +811,7 @@ function showGodEyePassed(){godEyeActive=true;momentActive=false;setReviewIndice
 function showGodEyeBlur(){godEyeActive=false;momentActive=false;setReviewIndices(files.map((_,i)=>i).filter(i=>godEyeBlur.has(keyOf(files[i]))),'신의 눈 흐림');closeAutoLab();countStatus();showToast(`흐림 후보 · ${reviewIndices.length.toLocaleString()}장`);}
 async function writeFileWithRelativePath(baseDir,file){let dir=baseDir;const parts=pathOf(file).split('/').filter(Boolean);if(parts.length>1)parts.shift();for(const part of parts.slice(0,-1)){dir=await dir.getDirectoryHandle(part.replace(/[\\/:*?"<>|]/g,'_'),{create:true});}const name=(parts.at(-1)||file.name).replace(/[\\/:*?"<>|]/g,'_');const h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(file);await w.close();}
 async function exportGodEyeBlur(){const rows=files.filter(f=>godEyeBlur.has(keyOf(f)));if(!rows.length){showToast('흐림 후보가 없습니다.');return;}const root=await getVerdictRootHandle();if(!root)return;analysisRunning=true;try{const dir=await root.getDirectoryHandle('신의눈_흐림후보',{create:true});let n=0;for(const f of rows){await writeFileWithRelativePath(dir,f);n++;autoProgressText.textContent=`격리 복사 ${n}/${rows.length}`;}showToast(`신의 눈 · ${rows.length}장 복사 완료`);}catch(e){alert('신의 눈 후보 복사 중 문제가 생겼습니다: '+e);}finally{analysisRunning=false;}}
-async function runGodEye(){startGodEyeBgm();if(!(await ensureQualityAnalysis('신의 눈'))){stopGodEyeBgm();return;}classifyGodEye();const pass=files.length-godEyeBlur.size;finishAutoPanel(`흔들리는 사진 속에서 네 모습이 떠올라\n확실하게 흐린 후보만 따로 모았습니다.`);stopGodEyeBgm();setAutoStats([['전체',files.length],['흐림 후보',godEyeBlur.size],['통과',pass]]);autoPrimary.style.display='block';autoPrimary.textContent='흐림 제외하고 보기';autoPrimary.onclick=showGodEyePassed;autoSecondary.style.display='block';autoSecondary.textContent='흐림 후보만 보기';autoSecondary.onclick=showGodEyeBlur;autoExport.style.display=godEyeBlur.size?'block':'none';autoExport.textContent='신의 눈 후보 따로 복사';autoExport.onclick=exportGodEyeBlur;updateAutoBadge();}
+async function runGodEye(){const bgmPromise=startGodEyeBgm();if(!(await ensureQualityAnalysis('신의 눈'))){stopGodEyeBgm(true);return;}await bgmPromise;classifyGodEye();const pass=files.length-godEyeBlur.size;finishAutoPanel(`흔들리는 사진 속에서 네 모습이 떠올라\n확실하게 흐린 후보만 따로 모았습니다.`);stopGodEyeBgm();setAutoStats([['전체',files.length],['흐림 후보',godEyeBlur.size],['통과',pass]]);autoPrimary.style.display='block';autoPrimary.textContent='흐림 제외하고 보기';autoPrimary.onclick=showGodEyePassed;autoSecondary.style.display='block';autoSecondary.textContent='흐림 후보만 보기';autoSecondary.onclick=showGodEyeBlur;autoExport.style.display=godEyeBlur.size?'block':'none';autoExport.textContent='신의 눈 후보 따로 복사';autoExport.onclick=exportGodEyeBlur;updateAutoBadge();}
 function burstPair(a,b){const fa=files[a],fb=files[b],ma=qualityMetrics.get(keyOf(fa)),mb=qualityMetrics.get(keyOf(fb));if(!ma||!mb||ma.error||mb.error)return false;if(dirnameOf(fa)!==dirnameOf(fb))return false;const sa=fileSeqInfo(fa),sb=fileSeqInfo(fb);const ng=(sa.num!=null&&sb.num!=null&&sa.prefix===sb.prefix)?Math.abs(sb.num-sa.num):999;const dt=Math.abs((mb.captureTime||0)-(ma.captureTime||0));const visual=hammingSignature(ma.signature,mb.signature);let timeOK=false;if(ma.timeSource==='exif'&&mb.timeSource==='exif')timeOK=dt<=2200;else timeOK=(dt<=2500&&ng<=3)||(dt===0&&ng<=2);return timeOK&&visual<=24&&(ng<=4||ma.timeSource==='exif');}
 function buildBurstGroups(){burstGroups=[];burstInfoByIndex.clear();burstBestIndices.clear();momentSkipped.clear();let cur=[];const flush=()=>{if(cur.length>=2){for(let s=0;s<cur.length;s+=30){const chunk=cur.slice(s,s+30);if(chunk.length>=2)burstGroups.push(chunk);}}cur=[];};for(let i=0;i<files.length;i++){if(!cur.length)cur=[i];else if(burstPair(cur[cur.length-1],i))cur.push(i);else{flush();cur=[i];}}flush();burstGroups.forEach((group,gi)=>{const vals=group.map(i=>Math.log1p(qualityMetrics.get(keyOf(files[i]))?.bestZone||0));const mn=Math.min(...vals),mx=Math.max(...vals);let best=group[0],bestScore=-1;group.forEach((i,pos)=>{const m=qualityMetrics.get(keyOf(files[i]));const sharp=mx>mn?(Math.log1p(m.bestZone)-mn)/(mx-mn):.5;const contrast=clamp(m.contrast/62);const score=.72*sharp+.20*m.exposure+.08*contrast-(godEyeBlur.has(keyOf(files[i]))?.5:0);if(score>bestScore){bestScore=score;best=i;}burstInfoByIndex.set(i,{group:gi+1,pos:pos+1,size:group.length,bestIndex:null,score});});burstBestIndices.add(best);for(const i of group){const x=burstInfoByIndex.get(i);x.bestIndex=best;if(i!==best)momentSkipped.add(keyOf(files[i]));}});}
 function momentFocusIndices(bestOnly=false){const member=new Set();for(const g of burstGroups)for(const i of g)member.add(i);const out=[];for(let i=0;i<files.length;i++){if(godEyeActive&&godEyeBlur.has(keyOf(files[i])))continue;if(member.has(i)){if(burstBestIndices.has(i))out.push(i);}else if(!bestOnly)out.push(i);}return out;}
@@ -792,7 +829,7 @@ const isImage=f=>{
   const ext=(f.name.split('.').pop()||'').toLowerCase();
   return ['jpg','jpeg','png','webp','bmp','gif'].includes(ext) || (f.type||'').startsWith('image/');
 };
-const pathOf=f=>(f.webkitRelativePath||f.name||'').replaceAll('\\','/');
+const pathOf=f=>(f.__relativePath||f.webkitRelativePath||f.name||'').replaceAll('\\','/');
 const fileCollator=new Intl.Collator('ko',{numeric:true,sensitivity:'base'});
 const legacyKeyOf=f=>`${f.name}::${f.size}::${f.lastModified}`;
 const keyOf=f=>`${pathOf(f)}::${f.size}::${f.lastModified}`;
@@ -847,15 +884,55 @@ function saveMobilePrefs(){try{localStorage.setItem(PREF_KEY,JSON.stringify(mobi
 function haptic(ms=12){if(mobilePrefs.vibrate && navigator.vibrate) try{navigator.vibrate(ms);}catch{}}
 const godEyeAudio=$('#godEyeAudio');
 let godEyeFadeTimer=null;
-function startGodEyeBgm(){
-  if(!mobilePrefs.bgm||!godEyeAudio)return;
+let godEyeAudioState='idle';
+let godEyeStartedAt=0;
+let godEyeStopTimer=0;
+async function startGodEyeBgm(){
+  if(!godEyeAudio)return false;
+  if(!mobilePrefs.bgm){showToast('신의 눈 BGM · 설정에서 꺼져 있습니다.');return false;}
   clearInterval(godEyeFadeTimer);
-  try{godEyeAudio.pause();godEyeAudio.currentTime=0;godEyeAudio.volume=0;const pr=godEyeAudio.play();if(pr?.catch)pr.catch(()=>{});}catch{}
-  let v=0;godEyeFadeTimer=setInterval(()=>{v=Math.min(.22,v+.02);try{godEyeAudio.volume=v;}catch{}if(v>=.22){clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;}},90);
+  try{
+    godEyeAudioState='starting';
+    godEyeAudio.pause();
+    godEyeAudio.currentTime=0;
+    godEyeAudio.muted=false;
+    godEyeAudio.volume=.04;
+    godEyeAudio.load();
+    await godEyeAudio.play();
+    godEyeAudioState='playing';
+    godEyeStartedAt=Date.now();
+    let v=godEyeAudio.volume||.04;
+    godEyeFadeTimer=setInterval(()=>{
+      v=Math.min(.34,v+.025);
+      try{godEyeAudio.volume=v;}catch{}
+      if(v>=.34){clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;}
+    },80);
+    return true;
+  }catch(err){
+    godEyeAudioState='error';
+    console.warn('신의 눈 BGM 재생 실패',err);
+    showToast('BGM 재생 실패 · 미디어 음량 또는 브라우저 권한을 확인하세요.');
+    return false;
+  }
 }
-function stopGodEyeBgm(){
-  if(!godEyeAudio)return;clearInterval(godEyeFadeTimer);
-  godEyeFadeTimer=setInterval(()=>{const v=Math.max(0,(godEyeAudio.volume||0)-.025);try{godEyeAudio.volume=v;}catch{}if(v<=0){clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;try{godEyeAudio.pause();godEyeAudio.currentTime=0;}catch{}}},80);
+function stopGodEyeBgm(force=false){
+  if(!godEyeAudio)return;
+  clearTimeout(godEyeStopTimer);
+  if(!force && !godEyeAudio.paused && godEyeStartedAt){
+    const remain=4000-(Date.now()-godEyeStartedAt);
+    if(remain>0){godEyeStopTimer=setTimeout(()=>stopGodEyeBgm(true),remain);return;}
+  }
+  clearInterval(godEyeFadeTimer);
+  if(godEyeAudio.paused){try{godEyeAudio.currentTime=0;}catch{};godEyeAudioState='idle';return;}
+  godEyeFadeTimer=setInterval(()=>{
+    const v=Math.max(0,(godEyeAudio.volume||0)-.035);
+    try{godEyeAudio.volume=v;}catch{}
+    if(v<=0){
+      clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;
+      try{godEyeAudio.pause();godEyeAudio.currentTime=0;}catch{}
+      godEyeAudioState='idle';godEyeStartedAt=0;
+    }
+  },70);
 }
 
 
@@ -1222,15 +1299,20 @@ picker.addEventListener('change',e=>{
 });
 
 if(folderPicker){
-  // webkitdirectory는 폴더를 고르면 내부 파일 전체를 FileList로 넘긴다.
+  // webkitdirectory 폴백: 폴더 내부 파일 전체를 FileList로 받는다.
   folderPicker.webkitdirectory=true;
-  folderPicker.addEventListener('change',e=>{
+  folderPicker.addEventListener('change',async e=>{
     const incoming=Array.from(e.target.files||[]);
     const root=(incoming[0]?.webkitRelativePath||'').split('/')[0]||'선택한 폴더';
     e.target.value='';
-    ingestFiles(incoming,`일터 소환 · ${root}`).then(()=>{
+    if(!incoming.length){showToast('일터 소환 · 선택된 사진이 없습니다.');return;}
+    try{
+      await ingestFiles(incoming,`일터 소환 · ${root}`);
       if(files.length>=1000) showToast(`대량 모드 · ${files.length.toLocaleString()}장 · 필요한 사진만 순차 로딩`);
-    });
+    }catch(err){
+      console.error('폴더 로딩 실패',err);
+      showToast('폴더 로딩 실패 · 개별 사진 소환은 사용할 수 있습니다.');
+    }
   });
 }
 
@@ -1591,7 +1673,7 @@ function bindMirror(mobileSel,desktopSel,after){
 bindMirror('#mOptName','#optName');bindMirror('#mOptResume','#optResume');bindMirror('#mOptThumb','#optThumb');
 if($('#mOptVibrate')){ $('#mOptVibrate').checked=mobilePrefs.vibrate; $('#mOptVibrate').onchange=e=>{mobilePrefs.vibrate=e.target.checked;saveMobilePrefs();haptic(18);}; }
 const optBgm=$('#optBgm'),mOptBgm=$('#mOptBgm');
-function syncBgmPrefs(value){mobilePrefs.bgm=!!value;if(optBgm)optBgm.checked=mobilePrefs.bgm;if(mOptBgm)mOptBgm.checked=mobilePrefs.bgm;saveMobilePrefs();if(!mobilePrefs.bgm)stopGodEyeBgm();}
+function syncBgmPrefs(value){mobilePrefs.bgm=!!value;if(optBgm)optBgm.checked=mobilePrefs.bgm;if(mOptBgm)mOptBgm.checked=mobilePrefs.bgm;saveMobilePrefs();if(!mobilePrefs.bgm)stopGodEyeBgm(true);}
 if(optBgm){optBgm.checked=mobilePrefs.bgm;optBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
 if(mOptBgm){mOptBgm.checked=mobilePrefs.bgm;mOptBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
 if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();verdictRootHandle=null;const h=await getVerdictRootHandle();if(h)showToast('정리 폴더 선택 완료');};
@@ -1607,6 +1689,12 @@ let touchStartX=0,touchStartY=0,touchStartAt=0;
 stage.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;touchStartAt=Date.now();},{passive:true});
 stage.addEventListener('touchend',e=>{if(!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touchStartX;const dy=e.changedTouches[0].clientY-touchStartY;const dt=Date.now()-touchStartAt;if(dt<550&&Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.4){dx<0?move(1):move(-1);}},{passive:true});
 
+
+window.__photoJudgeDebug={
+  get fileCount(){return files.length;},
+  get currentPath(){return currentFile()?pathOf(currentFile()):null;},
+  get audio(){return godEyeAudio?{paused:godEyeAudio.paused,currentTime:godEyeAudio.currentTime,readyState:godEyeAudio.readyState,state:godEyeAudioState,bgmEnabled:mobilePrefs.bgm}:null;}
+};
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   // v2.3 단일 통합판: 예전 /pc/·/mobile/ 전용 서비스워커가 남아 있으면 정리한다.
   navigator.serviceWorker.getRegistrations?.().then(regs=>{
@@ -1615,7 +1703,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=233-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=236-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
