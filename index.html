@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3</title>
+<title>사진판정소 · v2.3.2</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -308,7 +308,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 /* ===== v2.3 사진판정소 identity ===== */
 #splash{position:fixed;inset:0;z-index:9999;background:#050505;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .5s ease;pointer-events:auto}
 #splash.hide{opacity:0;pointer-events:none}
-#splash img{width:min(86vw,560px);height:min(88vh,900px);object-fit:contain;filter:drop-shadow(0 0 26px #b8933c24)}
+#splash img{width:min(86vw,560px);height:min(88vh,900px);object-fit:contain;filter:drop-shadow(0 0 26px #b8933c24);opacity:0;transform:scale(.985);transition:opacity .25s ease,transform .35s ease}
+#splash.ready img{opacity:1;transform:scale(1)}
 .verdictText{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;min-width:0}
 .verdictText b{font-size:14px;letter-spacing:.04em}
 .verdictText em{font-style:normal;font-size:9px;font-weight:800;opacity:.78;margin-top:4px;white-space:nowrap}
@@ -325,6 +326,34 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 </head>
 <body>
 <div id="splash" aria-hidden="true"><img src="./splash.png" alt="사진판정소"></div>
+<script>
+(()=>{
+  const sp=document.getElementById('splash');
+  if(!sp)return;
+  const img=sp.querySelector('img');
+  let started=false;
+  const startSplashClock=()=>{
+    if(started)return;
+    started=true;
+    requestAnimationFrame(()=>{
+      sp.classList.add('ready');
+      window.setTimeout(()=>{
+        sp.classList.add('hide');
+        window.setTimeout(()=>{if(sp&&sp.parentNode)sp.parentNode.removeChild(sp);},550);
+      },3500);
+    });
+  };
+  if(!img){startSplashClock();return;}
+  if(img.complete){
+    if(img.decode) img.decode().catch(()=>{}).finally(startSplashClock);
+    else startSplashClock();
+  }else{
+    img.addEventListener('load',startSplashClock,{once:true});
+    img.addEventListener('error',startSplashClock,{once:true});
+    window.setTimeout(startSplashClock,5000);
+  }
+})();
+</script>
 <audio id="godEyeAudio" src="./god_eye_bgm.mp3" preload="metadata"></audio>
 <div id="app">
   <div id="copyLT" class="corner-copy">오늘도 많이 찍었다</div>
@@ -334,7 +363,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.2 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -544,7 +573,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.2 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -1506,7 +1535,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=23-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=231-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
@@ -1521,7 +1550,6 @@ setTimeout(()=>preloadGoogleDrive(),0);
 if(!FOLDER_PICK_SUPPORTED){
   document.querySelectorAll('label[for="folderPicker"]').forEach(el=>{el.title='이 브라우저에서는 폴더 선택이 제한될 수 있습니다. 사진 파일 불러오기를 사용하세요.';});
 }
-setTimeout(()=>{const sp=$('#splash');if(sp){sp.classList.add('hide');setTimeout(()=>sp.remove(),550);}},3500);
 render();
 })();
 </script>
