@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3.6</title>
+<title>사진판정소 · v2.3.7</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -323,15 +323,89 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
-/* v2.3.6 import controls */
+/* v2.3.7 import + fixed desktop button dock */
 button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
 .drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
 @media (min-width:861px){
-  /* 판정 버튼은 하단 작업바 위에 독립적으로 떠야 한다. */
-  #verdictPanel{bottom:154px}
-  #bottom{bottom:14px}
-  #stage{bottom:236px}
+  /* 하단 작업 버튼과 GO/HOLD/DROP을 서로 다른 고정 레이어로 분리한다. */
+  #app{height:100dvh;min-height:0}
+  #bottom{
+    position:fixed;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    width:min(1040px,calc(100vw - 40px));
+    max-width:none;
+    z-index:30;
+  }
+  #bottom .actionRow{
+    width:100%;
+    grid-template-columns:.95fr .95fr 1.05fr 1.25fr 1.15fr 1.05fr;
+    gap:7px;
+  }
+  #bottom .actionRow .btn{
+    min-width:0;
+    height:46px;
+    padding:0 8px;
+    font-size:11px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #verdictPanel{
+    position:fixed;
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    bottom:calc(var(--desktop-bottom-h,112px) + 24px);
+    width:min(760px,calc(100vw - 40px));
+    min-width:0;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:9px;
+    z-index:31;
+  }
+  #verdictPanel .btn{
+    height:62px;
+    min-width:0;
+    padding:0 12px;
+    overflow:hidden;
+  }
+  #verdictPanel .btn img{
+    width:48px!important;
+    height:46px!important;
+    object-fit:contain;
+    flex:0 0 auto;
+  }
+  #verdictPanel .verdictText{min-width:0}
+  #verdictPanel .verdictText b{font-size:14px}
+  #verdictPanel .verdictText em{font-size:9px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  #stage{
+    bottom:calc(var(--desktop-bottom-h,112px) + var(--desktop-verdict-h,62px) + 50px);
+  }
+  #filmstrip{
+    bottom:calc(var(--desktop-bottom-h,112px) + var(--desktop-verdict-h,62px) + 56px);
+  }
+  .actionRow .folderPickBtn{background:#3b4f42;border-color:#65796b}
+  #installTopBtn,#mobileMenuBtn,#mobileDrawer,#mobileQuick,#finishSheet{display:none!important}
 }
+@media (min-width:861px) and (max-width:980px){
+  #bottom{width:calc(100vw - 24px)}
+  #bottom .actionRow{gap:5px}
+  #bottom .actionRow .btn{font-size:10px;padding:0 5px}
+  #verdictPanel{width:min(720px,calc(100vw - 24px))}
+}
+@media (min-width:861px) and (max-height:700px){
+  #statusbar{margin-bottom:3px;font-size:10px}
+  .batchHint{margin-top:1px;font-size:9px}
+  #autoToolbar{margin-bottom:4px}
+  #autoToolbar .btn{height:30px}
+  #bottom .actionRow .btn{height:40px}
+  #verdictPanel{bottom:calc(var(--desktop-bottom-h,98px) + 16px)}
+  #verdictPanel .btn{height:52px}
+  #verdictPanel .btn img{width:42px!important;height:40px!important}
+  #stage{bottom:calc(var(--desktop-bottom-h,98px) + var(--desktop-verdict-h,52px) + 36px)}
+}
+
 
 </style>
 </head>
@@ -419,7 +493,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.6 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.7 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -618,7 +692,7 @@ const DRIVE_CONFIG={
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 
-// v2.3.6: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// v2.3.7: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
 // 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
 // 실제 버튼에서 각각의 input.click()을 직접 호출한다.
 if(picker){
@@ -690,7 +764,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.6`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.6 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.7`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.7 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -1703,7 +1777,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=236-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=237-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
@@ -1712,6 +1786,34 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     }catch(e){console.warn('service worker update failed',e);}
   });
 }
+
+// v2.3.7: desktop bottom dock follows actual rendered height.
+function syncDesktopDockLayout(){
+  if(window.matchMedia('(max-width: 860px)').matches)return;
+  const root=document.documentElement;
+  const bottom=document.getElementById('bottom');
+  const verdict=document.getElementById('verdictPanel');
+  if(!bottom||!verdict)return;
+  const bh=Math.ceil(bottom.getBoundingClientRect().height);
+  const vh=Math.ceil(verdict.getBoundingClientRect().height);
+  if(bh>0)root.style.setProperty('--desktop-bottom-h',`${bh}px`);
+  if(vh>0)root.style.setProperty('--desktop-verdict-h',`${vh}px`);
+}
+let desktopDockRAF=0;
+function queueDesktopDockLayout(){
+  cancelAnimationFrame(desktopDockRAF);
+  desktopDockRAF=requestAnimationFrame(syncDesktopDockLayout);
+}
+if('ResizeObserver' in window){
+  const dockObserver=new ResizeObserver(queueDesktopDockLayout);
+  const b=document.getElementById('bottom'),v=document.getElementById('verdictPanel');
+  if(b)dockObserver.observe(b);
+  if(v)dockObserver.observe(v);
+}
+window.addEventListener('resize',queueDesktopDockLayout,{passive:true});
+window.visualViewport?.addEventListener('resize',queueDesktopDockLayout,{passive:true});
+queueDesktopDockLayout();
+setTimeout(queueDesktopDockLayout,60);
 
 updateDriveButtons();
 setTimeout(()=>preloadGoogleDrive(),0);
