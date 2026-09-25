@@ -1,11 +1,11 @@
 {
-  "name": "사진품질판정원",
-  "short_name": "사진판정원",
+  "name": "사진판정소",
+  "short_name": "사진판정소",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F4EBDD",
-  "theme_color": "#F4EBDD",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "icons": [
     {
       "src": "./icon-192.png",
