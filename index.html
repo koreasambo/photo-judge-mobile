@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3.8</title>
+<title>사진판정소 · v2.3.9</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -323,7 +323,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
-/* v2.3.8 import + fixed desktop button dock */
+/* v2.3.9 import + fixed desktop button dock */
 button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
 .drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
 @media (min-width:861px){
@@ -493,7 +493,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.8 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.9 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -694,7 +694,7 @@ const DRIVE_CONFIG={
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 
-// v2.3.8: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// v2.3.9: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
 // 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
 // 실제 버튼에서 각각의 input.click()을 직접 호출한다.
 if(picker){
@@ -771,7 +771,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.8`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.8 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.9`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.9 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -1037,6 +1037,17 @@ function restoreSessionForFiles(){
     if(['keep','hold','kill'].includes(v)){decisions.set(k,v);restored++;}
   }
   if(saved.lastKey){const i=files.findIndex(f=>keyOf(f)===saved.lastKey || legacyKeyOf(f)===saved.lastKey); if(i>=0)idx=i;}
+  return restored;
+}
+function restoreHistoricalRecordsForFiles(){
+  let restored=0;
+  for(const f of files){
+    const k=keyOf(f);
+    if(decisions.has(k)) continue;
+    const v=recordOf(f);
+    if(['keep','hold','kill'].includes(v)){decisions.set(k,v);restored++;}
+  }
+  if(restored>0) scheduleSaveSession();
   return restored;
 }
 function resetZoom(){
@@ -1430,22 +1441,21 @@ async function ingestFiles(incoming, sourceLabel='기기'){
     }
   }
 
+  let recoverHistory=true;
+  files=incoming;
   if(repeatKeys.size>0){
-    const ok=confirm(`마! 니 이거 안봤었나?\n\n전에 골랐던 사진이 ${repeatKeys.size}장 있습니다.\n이번 작업에도 다시 넣을겨?\n\n[확인] 포함 · [취소] 전에 본 사진은 빼기`);
-    files=ok ? incoming : incoming.filter(f=>!repeatKeys.has(keyOf(f)));
-    if(!ok){for(const k of repeatKeys) priorAtImport.delete(k);}
-  }else{
-    files=incoming;
+    recoverHistory=confirm(`전에 골라둔 사진이 ${repeatKeys.size}장 있습니다.\n\n이전 GO / HOLD / DROP 선택을 그대로 복구할까요?\n\n[확인] 이전 선택 복구 · [취소] 이번엔 새로 선택`);
+    if(!recoverHistory){ priorAtImport.clear(); }
   }
 
   idx=0;finishShown=false;closeFinishSheet();
   empty.innerHTML='<strong>날래날래 사진을 부르시오.</strong>흔들린 기억이든, 선명한 집착이든. 들이시오.';
-  const restored=restoreSessionForFiles();
+  const restoredSession=restoreSessionForFiles();
+  const restoredHistory=recoverHistory ? restoreHistoricalRecordsForFiles() : 0;
+  const restored=restoredSession+restoredHistory;
   render();
-  if(repeatKeys.size>0 && files.length>0){
-    setTimeout(()=>showToast(`${sourceLabel} · 지난 선택 확인 · ${repeatKeys.size}장`),80);
-  }else if(restored>0){
-    showToast(`${sourceLabel} · 지난 선택 ${restored}장 복구`);
+  if(restored>0){
+    showToast(`${sourceLabel} · 이전 선택 ${restored}장 복구 완료`);
   }else{
     showToast(`${sourceLabel} · ${files.length}장 불러옴`);
   }
@@ -1868,7 +1878,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=237-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=239-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
@@ -1878,7 +1888,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   });
 }
 
-// v2.3.8: desktop bottom dock follows actual rendered height.
+// v2.3.9: desktop bottom dock follows actual rendered height.
 function syncDesktopDockLayout(){
   if(window.matchMedia('(max-width: 860px)').matches)return;
   const root=document.documentElement;
