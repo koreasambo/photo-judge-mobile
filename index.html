@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3.2</title>
+<title>사진판정소 · v2.3.5</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -274,7 +274,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   #stage{bottom:226px}
   #verdictPanel{bottom:96px}
   #filmstrip{bottom:232px}
-  .actionRow label[for="folderPicker"]{background:#3b4f42;border-color:#65796b}
+  .actionRow .folderPickBtn{background:#3b4f42;border-color:#65796b}
   #installTopBtn,#mobileMenuBtn,#mobileDrawer,#mobileQuick,#finishSheet{display:none!important}
 }
 
@@ -322,6 +322,16 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   .quickLoad{font-size:11px}
 }
 
+
+/* v2.3.5 import controls */
+button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
+.drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
+@media (min-width:861px){
+  #verdictPanel{bottom:104px}
+  #bottom{bottom:14px}
+  #stage{bottom:236px}
+}
+
 </style>
 </head>
 <body>
@@ -361,16 +371,24 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       if(img.decode) img.decode().catch(()=>{}).finally(showSplash);
       else showSplash();
     }else{
-      img.addEventListener('load',showSplash,{once:true});
-      img.addEventListener('error',showSplash,{once:true});
-      // 이미지 로딩이 비정상적으로 길어져도 검은 화면에 갇히지 않게 한다.
-      window.setTimeout(showSplash,5000);
+      let fallbackTimer=0;
+      let settled=false;
+      const finish=()=>{
+        if(settled)return;
+        settled=true;
+        window.clearTimeout(fallbackTimer);
+        showSplash();
+      };
+      img.addEventListener('load',finish,{once:true});
+      img.addEventListener('error',finish,{once:true});
+      // 이미지 로딩이 비정상적으로 길어질 때만 1회 실행. 정상 로드되면 즉시 취소한다.
+      fallbackTimer=window.setTimeout(finish,5000);
     }
   }
 
   // 파일 선택/Drive 인증에서 앱으로 돌아오는 경우에는 시작 스플래시를 다시 띄우지 않는다.
   document.addEventListener('click',e=>{
-    const t=e.target.closest?.('label[for="picker"],label[for="folderPicker"],#mDrive,#mDriveImport,#driveImportBtn');
+    const t=e.target.closest?.('.photoPickBtn,.folderPickBtn,label[for="picker"],label[for="folderPicker"],#mDrive,#mDriveImport,#driveImportBtn');
     if(t)skipNextResume=true;
   },true);
 
@@ -400,7 +418,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.3 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.5 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -412,8 +430,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
       <div class="drawerHead"><div><strong>사진판정소</strong><span>Mobile</span></div><button class="drawerClose" data-close-drawer>×</button></div>
       <div class="drawerMascots"><img src="./GO.png" alt="배곰이와 곰톨이"></div>
       <button id="mInstallApp" class="drawerItem"><b>앱으로 설치하기</b><span>홈 화면 아이콘으로 바로 실행</span></button>
-      <label for="folderPicker" class="drawerItem" style="display:block"><b>일터 소환</b><span>폴더째 불러와 한 번에 작업</span></label>
-      <label for="picker" class="drawerItem" style="display:block"><b>사진 소환</b><span>필요한 사진만 골라 불러오기</span></label>
+      <button type="button" class="drawerItem folderPickBtn"><b>일터 소환</b><span>폴더 전체를 한 번에 불러오기</span></button>
+      <button type="button" class="drawerItem photoPickBtn"><b>사진 소환</b><span>사진을 한 장 또는 여러 장 직접 선택</span></button>
       <button id="mDriveImport" class="drawerItem"><b>구름저장소 소환</b><span>Google Drive에서 필요한 사진 불러오기</span></button>
       <div class="drawerSection">Auto Select</div>
       <button id="mGodEye" class="drawerItem"><b>신의 눈</b><span>확실한 초점 이탈·심한 흐림 후보만 격리</span></button>
@@ -436,8 +454,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 
   <div id="mobileQuick" class="mobileOnly">
     <button id="mPrev" class="quickBtn">←</button>
-    <label for="folderPicker" class="quickLoad">일터 소환</label>
-    <label for="picker" class="quickLoad">사진 소환</label>
+    <button type="button" class="quickLoad folderPickBtn">일터 소환</button>
+    <button type="button" class="quickLoad photoPickBtn">사진 소환</button>
     <button id="mNext" class="quickBtn">→</button>
   </div>
 
@@ -474,11 +492,11 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   </aside>
 
   <section id="bottom">
-    <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · 신의눈 <b id="cBlur">0</b> · 찰나제외 <b id="cMomentSkip">0</b> · 미선택 <b id="cNone">0</b></div><div id="batchHint" class="batchHint">폴더 선택 시 내부 사진 전체가 작업목록에 들어옵니다.</div>
+    <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · 신의눈 <b id="cBlur">0</b> · 찰나제외 <b id="cMomentSkip">0</b> · 미선택 <b id="cNone">0</b></div><div id="batchHint" class="batchHint">일터 소환 = 폴더 전체 · 사진 소환 = 한 장 또는 여러 장 직접 선택</div>
     <div id="autoToolbar"><button id="godEyeBtn" class="btn">신의 눈</button><button id="momentBtn" class="btn">찰나의 선택</button><button id="showAllBtn" class="btn">전체 사진</button></div>
     <div class="actionRow">
-      <label for="folderPicker" class="btn">일터 소환</label>
-      <label for="picker" class="btn">사진 소환</label>
+      <button type="button" class="btn folderPickBtn">일터 소환</button>
+      <button type="button" class="btn photoPickBtn">사진 소환</button>
       <button id="driveImportBtn" class="btn">구름저장소 소환</button>
       <button id="unreviewedBtn" class="btn">선택받지 못한 사진</button>
       <button id="submitBtn" class="btn submit">선택 결과</button>
@@ -492,8 +510,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
     <button id="killBtn" class="btn kill"><img src="./DROP.png" alt=""><span class="verdictText"><b>DROP</b><em>보낼 추억</em></span><small>3</small></button>
   </div>
 
-  <input id="picker" class="fileInput" type="file" multiple accept=".jpg,.jpeg,.png,.webp,.bmp,.gif,image/*">
-  <input id="folderPicker" class="fileInput" type="file" multiple webkitdirectory directory accept="image/*">
+  <input id="picker" class="fileInput" type="file" multiple accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.gif" aria-label="사진 한 장 또는 여러 장 선택">
+  <input id="folderPicker" class="fileInput" type="file" multiple webkitdirectory directory accept="image/*" aria-label="사진 폴더 선택">
 </div>
 
 <div id="finishSheet" class="mobileOnly finishSheet" aria-hidden="true" style="display:none!important">
@@ -598,6 +616,31 @@ const DRIVE_CONFIG={
 };
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
+
+// v2.3.5: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
+// 실제 버튼에서 각각의 input.click()을 직접 호출한다.
+if(picker){
+  picker.multiple=true;
+  picker.removeAttribute('webkitdirectory');
+  picker.removeAttribute('directory');
+}
+function openPhotoPicker(){
+  if(!picker)return;
+  try{ picker.value=''; }catch{}
+  picker.click();
+}
+function openFolderPicker(){
+  if(!folderPicker)return;
+  try{ folderPicker.value=''; }catch{}
+  folderPicker.click();
+}
+document.addEventListener('click',e=>{
+  const photoBtn=e.target.closest?.('.photoPickBtn');
+  if(photoBtn){ e.preventDefault(); e.stopPropagation(); openPhotoPicker(); return; }
+  const folderBtn=e.target.closest?.('.folderPickBtn');
+  if(folderBtn){ e.preventDefault(); e.stopPropagation(); openFolderPicker(); }
+});
 const FOLDER_PICK_SUPPORTED=!!folderPicker && ('webkitdirectory' in folderPicker || 'webkitdirectory' in HTMLInputElement.prototype);
 const counter=$('#counter'), nameTag=$('#nameTag'), resume=$('#resume'), toast=$('#toast'), filmstrip=$('#filmstrip'), recordBadge=$('#recordBadge'), recordText=$('#recordText');
 const keepBtn=$('#keepBtn'), holdBtn=$('#holdBtn'), killBtn=$('#killBtn');
@@ -610,7 +653,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.3 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.5`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.5 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -1175,7 +1218,7 @@ async function ingestFiles(incoming, sourceLabel='기기'){
 picker.addEventListener('change',e=>{
   const incoming=Array.from(e.target.files||[]);
   e.target.value='';
-  ingestFiles(incoming,'내 폰');
+  ingestFiles(incoming,'사진 소환');
 });
 
 if(folderPicker){
@@ -1185,7 +1228,7 @@ if(folderPicker){
     const incoming=Array.from(e.target.files||[]);
     const root=(incoming[0]?.webkitRelativePath||'').split('/')[0]||'선택한 폴더';
     e.target.value='';
-    ingestFiles(incoming,`폴더 · ${root}`).then(()=>{
+    ingestFiles(incoming,`일터 소환 · ${root}`).then(()=>{
       if(files.length>=1000) showToast(`대량 모드 · ${files.length.toLocaleString()}장 · 필요한 사진만 순차 로딩`);
     });
   });
