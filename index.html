@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3.9</title>
+<title>사진판정소 · v2.4.0</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -323,7 +323,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
-/* v2.3.9 import + fixed desktop button dock */
+/* v2.4.0 import + fixed desktop button dock */
 button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
 .drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
 @media (min-width:861px){
@@ -493,7 +493,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.9 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.4.0 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -513,6 +513,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
       <button id="mMoment" class="drawerItem"><b>찰나의 선택</b><span>연사를 묶어 기술적으로 가장 안정적인 BEST 추천</span></button>
       <button id="mShowAll" class="drawerItem"><b>전체 사진 보기</b><span>자동 셀렉 필터를 해제하고 원래 목록으로 복귀</span></button>
       <button id="mHistory" class="drawerItem"><b>작업 기록</b><span>지금까지 고른 사진 다시 보기</span></button>
+      <button id="mRecover" class="drawerItem"><b>이전 선택 복구</b><span id="mRecoverSub">브라우저에 남은 선택 기록을 검사</span></button>
       <button id="mReview" class="drawerItem"><b>선택받지 못한 사진</b><span>아직 GO / HOLD / DROP을 받지 못한 사진</span></button>
       <button id="mExport" class="drawerItem"><b>결과 내보내기</b><span>선택 기록을 CSV로 저장</span></button>
       <div class="drawerSection">설정</div>
@@ -565,6 +566,8 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
     <label class="opt"><input id="optBgm" type="checkbox" checked>신의 눈 BGM</label>
     <button id="saveRootBtn" class="btn smallBtn" style="width:100%;margin-top:9px">저장 위치 지정</button>
     <div id="saveRootStatus" style="margin-top:7px;font-size:10px;line-height:1.35;color:#b9aa98;text-align:center">저장 위치 미지정</div>
+    <button id="recoverBtn" class="btn smallBtn" style="width:100%;margin-top:8px">이전 선택 복구</button>
+    <div id="recoverStatus" style="margin-top:6px;font-size:9px;line-height:1.35;color:#b9aa98;text-align:center">저장 기록 검사 중…</div>
     <div id="zoomBadge">맞춤 보기 · 휠 확대 · 드래그 이동</div>
   </aside>
 
@@ -694,7 +697,7 @@ const DRIVE_CONFIG={
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 
-// v2.3.9: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// v2.4.0: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
 // 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
 // 실제 버튼에서 각각의 input.click()을 직접 호출한다.
 if(picker){
@@ -771,7 +774,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.9`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.9 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.0`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.0 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -955,6 +958,132 @@ function scheduleSaveRecords(){
 }
 function statusKorean(v){
   return v==='keep'?'GO':v==='hold'?'HOLD':v==='kill'?'DROP':'-';
+}
+function normalizeDecisionValue(v){
+  if(v==null)return null;
+  const x=String(v).trim().toLowerCase();
+  if(['keep','go','살려','채택','남길 추억'].includes(x))return 'keep';
+  if(['hold','보류','유보','고민할 추억'].includes(x))return 'hold';
+  if(['kill','drop','죽여','제외','보낼 추억'].includes(x))return 'kill';
+  return null;
+}
+function addDecisionCandidate(out,k,v,source='unknown'){
+  if(typeof k!=='string')return;
+  const nv=normalizeDecisionValue(v); if(!nv)return;
+  const prev=out.get(k);
+  if(!prev) out.set(k,{status:nv,sources:new Set([source])});
+  else { prev.sources.add(source); if(prev.status!==nv) prev.conflict=true; }
+}
+function scanAllStoredDecisionRecords(){
+  const out=new Map();
+  // Known stores first.
+  try{
+    for(const [k,v] of criminalRecords||[]) addDecisionCandidate(out,k,v,'runtime-records');
+  }catch{}
+  const inspect=(data,source,depth=0)=>{
+    if(depth>3 || data==null)return;
+    if(Array.isArray(data)){
+      for(const row of data){
+        if(Array.isArray(row)&&row.length>=2)addDecisionCandidate(out,row[0],row[1],source);
+        else if(row&&typeof row==='object')inspect(row,source,depth+1);
+      }
+      return;
+    }
+    if(typeof data!=='object')return;
+    if(data.decisions && typeof data.decisions==='object') inspect(data.decisions,source+':decisions',depth+1);
+    if(data.records && typeof data.records==='object') inspect(data.records,source+':records',depth+1);
+    for(const [k,v] of Object.entries(data)){
+      if(k==='decisions'||k==='records')continue;
+      const nv=normalizeDecisionValue(v);
+      if(nv){addDecisionCandidate(out,k,nv,source);continue;}
+      if(v&&typeof v==='object'&&depth<2)inspect(v,source,depth+1);
+    }
+  };
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const lk=localStorage.key(i); if(!lk)continue;
+      const raw=localStorage.getItem(lk); if(!raw)continue;
+      try{ inspect(JSON.parse(raw),`localStorage:${lk}`); }catch{}
+    }
+  }catch{}
+  return out;
+}
+function storedKeyParts(k){
+  const parts=String(k).split('::');
+  if(parts.length<3)return null;
+  const mtime=Number(parts.pop()), size=Number(parts.pop()), path=parts.join('::').replaceAll('\\','/');
+  if(!Number.isFinite(size))return null;
+  const name=(path.split('/').pop()||path).toLowerCase();
+  return {path,pathLower:path.toLowerCase(),name,size,mtime:Number.isFinite(mtime)?mtime:null};
+}
+function currentFileParts(f){
+  const path=pathOf(f), name=(f.name||path.split('/').pop()||'').toLowerCase();
+  return {path,pathLower:path.toLowerCase(),name,size:Number(f.size||0),mtime:Number(f.lastModified||0)};
+}
+function uniqueStatusIndex(records,mode){
+  const tmp=new Map();
+  for(const [k,rec] of records){
+    if(rec.conflict)continue;
+    const p=storedKeyParts(k); if(!p)continue;
+    let sig='';
+    if(mode==='nameSizeTime')sig=`${p.name}::${p.size}::${p.mtime??''}`;
+    else if(mode==='nameSize')sig=`${p.name}::${p.size}`;
+    else sig=p.name;
+    if(!sig)continue;
+    const prev=tmp.get(sig);
+    if(!prev)tmp.set(sig,{status:rec.status,count:1,conflict:false,key:k});
+    else {prev.count++; if(prev.status!==rec.status)prev.conflict=true;}
+  }
+  const out=new Map();
+  for(const [sig,v] of tmp)if(!v.conflict && v.count===1)out.set(sig,v.status);
+  return out;
+}
+function findRecoveryMatches(targetFiles=files){
+  const records=scanAllStoredDecisionRecords();
+  const exact=new Map(); for(const [k,r] of records)if(!r.conflict)exact.set(k,r.status);
+  const byNST=uniqueStatusIndex(records,'nameSizeTime');
+  const byNS=uniqueStatusIndex(records,'nameSize');
+  const byN=uniqueStatusIndex(records,'name');
+  const matches=[]; const stats={stored:records.size,exact:0,nameSizeTime:0,nameSize:0,nameOnly:0,unmatched:0};
+  for(const f of targetFiles||[]){
+    const k=keyOf(f), lk=legacyKeyOf(f), p=currentFileParts(f);
+    let status=exact.get(k)||exact.get(lk), method=status?'exact':null;
+    if(!status){status=byNST.get(`${p.name}::${p.size}::${p.mtime}`); if(status)method='nameSizeTime';}
+    if(!status){status=byNS.get(`${p.name}::${p.size}`); if(status)method='nameSize';}
+    if(!status){status=byN.get(p.name); if(status)method='nameOnly';}
+    if(status){matches.push({file:f,key:k,status,method});stats[method]++;} else stats.unmatched++;
+  }
+  return {records,matches,stats};
+}
+function updateRecoveryStatus(){
+  const scanned=scanAllStoredDecisionRecords();
+  const n=scanned.size;
+  const txt=n?`브라우저 보관 기록 ${n.toLocaleString()}건`:'브라우저 보관 기록 0건';
+  const d=$('#recoverStatus'); if(d)d.textContent=txt;
+  const m=$('#mRecoverSub'); if(m)m.textContent=n?`${txt} · 현재 사진에 다시 적용`:'보관된 선택 기록이 발견되지 않음';
+  return n;
+}
+function applyRecoveryMatches(matches,{ask=true}={}){
+  if(!files.length){alert('먼저 예전에 작업했던 사진이나 폴더를 불러오세요.');return 0;}
+  if(!matches?.length){alert(`현재 불러온 사진과 맞는 이전 선택을 찾지 못했습니다.\n\n브라우저 보관 기록: ${scanAllStoredDecisionRecords().size}건\n현재 사진: ${files.length}장`);return 0;}
+  const counts=matches.reduce((a,x)=>(a[x.method]=(a[x.method]||0)+1,a),{});
+  if(ask){
+    const ok=confirm(`이전 선택 ${matches.length}장을 찾았습니다.\n\n정확 일치 ${counts.exact||0}장\n파일명+용량+시간 ${counts.nameSizeTime||0}장\n파일명+용량 ${counts.nameSize||0}장\n파일명 단독(유일한 경우만) ${counts.nameOnly||0}장\n\nGO / HOLD / DROP 상태로 복구할까요?`);
+    if(!ok)return 0;
+  }
+  let applied=0;
+  for(const x of matches){
+    if(!decisions.has(x.key)){decisions.set(x.key,x.status);applied++;}
+    criminalRecords.set(x.key,x.status); criminalRecords.set(legacyKeyOf(x.file),x.status);
+  }
+  if(applied){scheduleSaveSession();scheduleSaveRecords();render();countStatus();showToast(`이전 선택 ${applied}장 복구 완료`);}
+  updateRecoveryStatus();
+  return applied;
+}
+function manualRecoverPreviousSelections(){
+  updateRecoveryStatus();
+  if(!files.length){alert(`브라우저에 보관된 선택 기록: ${scanAllStoredDecisionRecords().size}건\n\n먼저 예전에 작업했던 사진/폴더를 불러온 뒤 다시 눌러주세요.`);return;}
+  const r=findRecoveryMatches(files); applyRecoveryMatches(r.matches,{ask:true});
 }
 criminalRecords=loadCriminalRecords();
 try{
@@ -1431,34 +1560,26 @@ async function ingestFiles(incoming, sourceLabel='기기'){
 
   priorAtImport.clear();
   resetAutoState();
-  const repeatKeys=new Set();
-  for(const f of incoming){
-    const k=keyOf(f);
-    const prior=recordOf(f);
-    if(prior){
-      repeatKeys.add(k);
-      priorAtImport.set(k,prior);
-    }
-  }
-
-  let recoverHistory=true;
   files=incoming;
-  if(repeatKeys.size>0){
-    recoverHistory=confirm(`전에 골라둔 사진이 ${repeatKeys.size}장 있습니다.\n\n이전 GO / HOLD / DROP 선택을 그대로 복구할까요?\n\n[확인] 이전 선택 복구 · [취소] 이번엔 새로 선택`);
-    if(!recoverHistory){ priorAtImport.clear(); }
-  }
-
   idx=0;finishShown=false;closeFinishSheet();
   empty.innerHTML='<strong>날래날래 사진을 부르시오.</strong>흔들린 기억이든, 선명한 집착이든. 들이시오.';
+
+  // First restore the still-open current session, then scan every localStorage entry for older records.
   const restoredSession=restoreSessionForFiles();
-  const restoredHistory=recoverHistory ? restoreHistoricalRecordsForFiles() : 0;
-  const restored=restoredSession+restoredHistory;
-  render();
-  if(restored>0){
-    showToast(`${sourceLabel} · 이전 선택 ${restored}장 복구 완료`);
-  }else{
-    showToast(`${sourceLabel} · ${files.length}장 불러옴`);
+  const recovery=findRecoveryMatches(files);
+  for(const x of recovery.matches) priorAtImport.set(x.key,x.status);
+  let restoredHistory=0;
+  const historicalOnly=recovery.matches.filter(x=>!decisions.has(x.key));
+  if(historicalOnly.length){
+    const c=recovery.stats;
+    const ok=confirm(`전에 고른 사진 ${historicalOnly.length}장을 찾았습니다.\n\n정확 일치 ${c.exact}장 · 파일명+용량 ${c.nameSizeTime+c.nameSize}장 · 파일명 유일매칭 ${c.nameOnly}장\n\n이전 GO / HOLD / DROP 선택을 복구할까요?`);
+    if(ok)restoredHistory=applyRecoveryMatches(historicalOnly,{ask:false});
+    else priorAtImport.clear();
   }
+  const restored=restoredSession+restoredHistory;
+  render(); updateRecoveryStatus();
+  if(restored>0) showToast(`${sourceLabel} · 이전 선택 ${restored}장 복구 완료`);
+  else showToast(`${sourceLabel} · ${files.length}장 불러옴`);
 }
 
 picker.addEventListener('change',e=>{
@@ -1833,6 +1954,7 @@ if($('#momentBtn')) $('#momentBtn').onclick=runMomentChoice;
 if($('#showAllBtn')) $('#showAllBtn').onclick=showAllPhotos;
 if($('#driveImportBtn')) $('#driveImportBtn').onclick=openGoogleDrive;
 if($('#mHistory')) $('#mHistory').onclick=()=>{closeDrawer();openResults();};
+if($('#mRecover')) $('#mRecover').onclick=()=>{closeDrawer();manualRecoverPreviousSelections();};
 if($('#mReview')) $('#mReview').onclick=()=>{closeDrawer();$('#unreviewedBtn').click();};
 if($('#mExport')) $('#mExport').onclick=()=>{closeDrawer();$('#csvBtn').click();};
 if($('#mEndTrial')) $('#mEndTrial').onclick=()=>{closeDrawer();endTrialAndReset();};
@@ -1850,6 +1972,7 @@ if(optBgm){optBgm.checked=mobilePrefs.bgm;optBgm.onchange=e=>syncBgmPrefs(e.targ
 if(mOptBgm){mOptBgm.checked=mobilePrefs.bgm;mOptBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
 if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();await chooseVerdictRootHandle(true);};
 if($('#saveRootBtn')) $('#saveRootBtn').onclick=async()=>{await chooseVerdictRootHandle(true);};
+if($('#recoverBtn')) $('#recoverBtn').onclick=manualRecoverPreviousSelections;
 if($('#finishClose')) $('#finishClose').onclick=closeFinishSheet;
 document.querySelectorAll('[data-close-finish]').forEach(el=>el.onclick=closeFinishSheet);
 if($('#finishResults')) $('#finishResults').onclick=()=>{closeFinishSheet();openResults();};
@@ -1868,6 +1991,11 @@ restoreVerdictRootHandle();
 window.__photoJudgeDebug={
   get fileCount(){return files.length;},
   get currentPath(){return currentFile()?pathOf(currentFile()):null;},
+  get decisions(){return Object.fromEntries(decisions);},
+  get recovery(){const r=findRecoveryMatches(files);return {stats:r.stats,matches:r.matches.map(x=>({name:x.file.name,status:x.status,method:x.method}))};},
+  scanStored(){return {count:scanAllStoredDecisionRecords().size,keys:[...scanAllStoredDecisionRecords().keys()]};},
+  ingestFiles,
+  recover:manualRecoverPreviousSelections,
   get audio(){return godEyeAudio?{paused:godEyeAudio.paused,currentTime:godEyeAudio.currentTime,readyState:godEyeAudio.readyState,state:godEyeAudioState,bgmEnabled:mobilePrefs.bgm}:null;}
 };
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
@@ -1878,7 +2006,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=239-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=240-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
@@ -1888,7 +2016,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   });
 }
 
-// v2.3.9: desktop bottom dock follows actual rendered height.
+// v2.4.0: desktop bottom dock follows actual rendered height.
 function syncDesktopDockLayout(){
   if(window.matchMedia('(max-width: 860px)').matches)return;
   const root=document.documentElement;
@@ -1917,6 +2045,7 @@ queueDesktopDockLayout();
 setTimeout(queueDesktopDockLayout,60);
 
 updateDriveButtons();
+updateRecoveryStatus();
 setTimeout(()=>preloadGoogleDrive(),0);
 if(!FOLDER_PICK_SUPPORTED){
   document.querySelectorAll('label[for="folderPicker"]').forEach(el=>{el.title='이 브라우저에서는 폴더 선택이 제한될 수 있습니다. 사진 파일 불러오기를 사용하세요.';});
