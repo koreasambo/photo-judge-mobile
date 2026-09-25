@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.3.7</title>
+<title>사진판정소 · v2.3.8</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -58,10 +58,10 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 #resume{position:absolute;left:50%;top:13px;transform:translateX(-50%);
   background:#000b;border:1px solid #ffffff18;border-radius:8px;padding:7px 12px;color:#c9bfaf;
   font-size:10px;text-align:center;display:none}
-#toast{position:absolute;z-index:12;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);
-  background:#100f0ee8;color:#fff3de;border:1px solid #ffffff30;border-radius:12px;padding:18px 28px;
-  font-size:27px;font-weight:950;opacity:0;pointer-events:none;transition:.12s ease;text-align:center}
-#toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#toast{position:absolute;z-index:12;right:18px;top:18px;left:auto;transform:translateY(-8px) scale(.98);
+  max-width:min(360px,70%);background:#100f0ee8;color:#fff3de;border:1px solid #ffffff30;border-radius:12px;padding:12px 16px;
+  font-size:17px;font-weight:950;opacity:0;pointer-events:none;transition:.14s ease;text-align:center;box-shadow:0 8px 26px #0007}
+#toast.show{opacity:1;transform:translateY(0) scale(1)}
 #recordBadge{display:none;position:absolute;z-index:11;left:16px;top:16px;min-width:155px;
   padding:10px 13px;border:1px solid #a94b58;border-radius:9px;background:#3a151be8;color:#ffe9d7;
   box-shadow:0 8px 24px #0008;text-align:center;pointer-events:none}
@@ -199,8 +199,8 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   #nameTag{bottom:10px;max-width:88%;border-radius:14px;font-size:10px;padding:6px 10px}
   #resume{top:10px;max-width:82%;border-radius:12px}
   #recordBadge{left:10px;top:10px;min-width:130px;padding:8px 10px;border-radius:13px}
-  #toast{left:50%;top:84px;transform:translateX(-50%) translateY(-8px);max-width:82vw;font-size:13px;line-height:1.35;border-radius:15px;padding:10px 14px;white-space:normal;box-shadow:0 8px 24px #0005}
-  #toast.show{transform:translateX(-50%) translateY(0)}
+  #toast{left:auto;right:10px;top:10px;transform:translateY(-7px) scale(.98);max-width:72vw;font-size:12px;line-height:1.35;border-radius:14px;padding:9px 12px;white-space:normal;box-shadow:0 8px 24px #0005}
+  #toast.show{transform:translateY(0) scale(1)}
   #filmstrip{left:12px;right:12px;bottom:180px;transform:none;width:auto;height:70px;border-radius:16px;justify-content:flex-start;overflow-x:auto}
   .thumb{width:74px;height:54px;flex:0 0 auto;border-radius:9px}
   #mobileQuick{position:absolute;z-index:16;left:12px;right:12px;bottom:106px;height:52px;gap:8px;align-items:center;display:grid;grid-template-columns:52px 1fr 1fr 52px}
@@ -323,7 +323,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
-/* v2.3.7 import + fixed desktop button dock */
+/* v2.3.8 import + fixed desktop button dock */
 button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
 .drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
 @media (min-width:861px){
@@ -493,7 +493,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.7 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.8 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -521,7 +521,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
       <label class="drawerToggle"><span>썸네일 보기</span><input id="mOptThumb" type="checkbox"></label>
       <label class="drawerToggle"><span>버튼 진동</span><input id="mOptVibrate" type="checkbox" checked></label>
       <label class="drawerToggle"><span>신의 눈 BGM</span><input id="mOptBgm" type="checkbox" checked></label>
-      <button id="mSaveRoot" class="drawerItem"><b>정리할 곳 정하기</b><span>GO / HOLD / DROP 복사본이 갈 위치</span></button>
+      <button id="mSaveRoot" class="drawerItem"><b>저장 위치 지정</b><span id="mSaveRootSub">선택 즉시 GO / HOLD / DROP 폴더로 저장</span></button>
       <button id="mEndTrial" class="drawerDanger">현재 작업 종료</button>
       <div class="drawerFoot">로컬 사진은 서버로 올리지 않습니다. 신의 눈과 찰나의 선택은 기기 안에서만 살펴보며 원본은 건드리지 않습니다. 구름저장소는 필요한 사진만 불러옵니다.</div>
     </div>
@@ -563,6 +563,8 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
     <label class="opt"><input id="optThumb" type="checkbox">썸네일 보기</label>
     <label class="opt"><input id="optCinema" type="checkbox">영화관 모드</label>
     <label class="opt"><input id="optBgm" type="checkbox" checked>신의 눈 BGM</label>
+    <button id="saveRootBtn" class="btn smallBtn" style="width:100%;margin-top:9px">저장 위치 지정</button>
+    <div id="saveRootStatus" style="margin-top:7px;font-size:10px;line-height:1.35;color:#b9aa98;text-align:center">저장 위치 미지정</div>
     <div id="zoomBadge">맞춤 보기 · 휠 확대 · 드래그 이동</div>
   </aside>
 
@@ -605,10 +607,10 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
     </div>
     <div class="finishActions">
       <button id="finishResults" class="finishAction primary">결과 모아보기</button>
-      <button id="finishFolders" class="finishAction folder">GO / HOLD / DROP 폴더로 한 번에 정리</button>
+      <button id="finishFolders" class="finishAction folder">저장 상태 다시 맞추기</button>
       <div class="finishActionRow"><button id="finishCsv" class="finishAction">선택 기록 저장</button><label for="folderPicker" id="finishNew" class="finishAction" style="display:flex;align-items:center;justify-content:center">새 폴더 불러오기</label></div>
     </div>
-    <div class="finishHint">원본 사진은 지우거나 이동하지 않습니다. 선택한 폴더에 GO / HOLD / DROP별 복사본을 만듭니다.</div>
+    <div class="finishHint">원본은 그대로 둡니다. 저장 위치를 지정하면 선택 즉시 GO / HOLD / DROP별 복사본을 만듭니다.</div>
   </section>
 </div>
 
@@ -692,7 +694,7 @@ const DRIVE_CONFIG={
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 
-// v2.3.7: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// v2.3.8: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
 // 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
 // 실제 버튼에서 각각의 input.click()을 직접 호출한다.
 if(picker){
@@ -760,11 +762,16 @@ let files=[], idx=0, decisions=new Map(), cache=new Map(), toastTimer=null;
 let reviewMode=null, reviewIndices=null;
 let resultThumbUrls=[];
 let verdictRootHandle=null;
+let verdictRootName='';
+let instantSaveQueue=Promise.resolve();
+let instantSaveErrors=0;
+let pendingInstantSaves=0;
+const FS_DB_NAME='photojudge.fs.v1', FS_STORE='handles', FS_KEY='verdictRoot';
 let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.7`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.7 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.8`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.8 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -1100,30 +1107,106 @@ function clearResultThumbUrls(){
   for(const u of resultThumbUrls) URL.revokeObjectURL(u);
   resultThumbUrls=[];
 }
+function openFsDb(){
+  return new Promise((resolve,reject)=>{
+    if(!('indexedDB' in window)){resolve(null);return;}
+    const req=indexedDB.open(FS_DB_NAME,1);
+    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(FS_STORE))req.result.createObjectStore(FS_STORE);};
+    req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
+  });
+}
+async function persistVerdictRootHandle(handle){
+  try{const db=await openFsDb();if(!db)return;await new Promise((resolve,reject)=>{const tx=db.transaction(FS_STORE,'readwrite');tx.objectStore(FS_STORE).put(handle,FS_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch(e){console.warn('save handle persist failed',e);}
+}
+async function loadPersistedVerdictRootHandle(){
+  try{const db=await openFsDb();if(!db)return null;const h=await new Promise((resolve,reject)=>{const tx=db.transaction(FS_STORE,'readonly');const r=tx.objectStore(FS_STORE).get(FS_KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);});db.close();return h;}catch(e){return null;}
+}
+async function clearPersistedVerdictRootHandle(){
+  try{const db=await openFsDb();if(!db)return;await new Promise((resolve,reject)=>{const tx=db.transaction(FS_STORE,'readwrite');tx.objectStore(FS_STORE).delete(FS_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch(e){}
+}
+function updateSaveRootUi(message){
+  const label=verdictRootHandle?(verdictRootName||verdictRootHandle.name||'지정됨'):'';
+  const text=message || (verdictRootHandle?`저장 위치 · ${label}\n선택 즉시 저장 ON`:'저장 위치 미지정');
+  const st=$('#saveRootStatus');if(st)st.textContent=text;
+  const btn=$('#saveRootBtn');if(btn)btn.textContent=verdictRootHandle?'저장 위치 변경':'저장 위치 지정';
+  const sub=$('#mSaveRootSub');if(sub)sub.textContent=verdictRootHandle?`${label} · 선택 즉시 저장 ON`:'선택 즉시 GO / HOLD / DROP 폴더로 저장';
+}
+async function permissionForHandle(handle,request=false){
+  if(!handle)return false;
+  try{
+    const opts={mode:'readwrite'};
+    if(handle.queryPermission && (await handle.queryPermission(opts))==='granted')return true;
+    if(request && handle.requestPermission && (await handle.requestPermission(opts))==='granted')return true;
+  }catch(e){}
+  return false;
+}
+async function restoreVerdictRootHandle(){
+  const h=await loadPersistedVerdictRootHandle();
+  if(!h){updateSaveRootUi();return;}
+  if(await permissionForHandle(h,false)){verdictRootHandle=h;verdictRootName=h.name||'';updateSaveRootUi();}
+  else{verdictRootHandle=null;verdictRootName=h.name||'';updateSaveRootUi(verdictRootName?`저장 위치 · ${verdictRootName}\n다시 승인 필요`:'저장 위치 다시 승인 필요');}
+}
+function safeFsName(v){return String(v||'').replace(/[\\/:*?"<>|]/g,'_');}
+async function getPathDir(baseDir,file,create=true){
+  let dir=baseDir;const parts=pathOf(file).split('/').filter(Boolean);if(parts.length>1)parts.shift();
+  for(const part of parts.slice(0,-1))dir=await dir.getDirectoryHandle(safeFsName(part),{create});
+  return {dir,name:safeFsName(parts.at(-1)||file.name)};
+}
+async function removeFileWithRelativePath(baseDir,file){
+  try{const {dir,name}=await getPathDir(baseDir,file,false);await dir.removeEntry(name);}catch(e){if(e?.name!=='NotFoundError')console.warn('remove old copy',e);}
+}
+async function syncOneDecision(root,file,status){
+  const folders={keep:'GO',hold:'HOLD',kill:'DROP'};
+  for(const [st,name] of Object.entries(folders)){
+    try{const dir=await root.getDirectoryHandle(name,{create:st===status});if(st===status)await writeFileWithRelativePath(dir,file);else await removeFileWithRelativePath(dir,file);}catch(e){if(e?.name!=='NotFoundError')throw e;}
+  }
+}
+async function syncExistingDecisionsToRoot(root,{toast=true}={}){
+  const judged=files.filter(f=>['keep','hold','kill'].includes(decisions.get(keyOf(f))));
+  if(!judged.length){if(toast)showToast('저장 위치 지정 완료 · 이제부터 즉시 저장');return 0;}
+  let n=0;updateSaveRootUi(`기존 선택 저장 중 · 0/${judged.length}`);
+  for(const f of judged){await syncOneDecision(root,f,decisions.get(keyOf(f)));n++;if(n===judged.length||n%5===0)updateSaveRootUi(`기존 선택 저장 중 · ${n}/${judged.length}`);}
+  updateSaveRootUi();if(toast)showToast(`기존 선택 ${n}장 저장 완료`);return n;
+}
+function queueInstantDecisionSave(file,status){
+  if(!verdictRootHandle)return;
+  pendingInstantSaves++;updateSaveRootUi(`사진 저장 중 · ${pendingInstantSaves}장`);
+  instantSaveQueue=instantSaveQueue.then(async()=>{
+    try{await syncOneDecision(verdictRootHandle,file,status);instantSaveErrors=0;}
+    catch(err){instantSaveErrors++;console.error('instant save failed',err);updateSaveRootUi('저장 오류 · 저장 위치를 다시 지정하세요');showToast('사진 저장 실패 · 저장 위치 확인');}
+    finally{pendingInstantSaves=Math.max(0,pendingInstantSaves-1);if(!instantSaveErrors)updateSaveRootUi(pendingInstantSaves?`사진 저장 중 · ${pendingInstantSaves}장`:undefined);}
+  });
+}
+async function chooseVerdictRootHandle(forcePicker=false){
+  if(!('showDirectoryPicker' in window)){alert('이 브라우저는 사진을 폴더에 직접 저장할 수 없습니다. PC Chrome/Edge에서 사용해 주세요.');return null;}
+  if(saveBusy)return null;
+  saveBusy=true;setAcceptButtonsDisabled(true);
+  try{
+    let chosen=null;
+    if(!forcePicker){
+      const remembered=await loadPersistedVerdictRootHandle();
+      if(remembered && await permissionForHandle(remembered,true)) chosen=remembered;
+    }
+    if(!chosen) chosen=await window.showDirectoryPicker({mode:'readwrite'});
+    verdictRootHandle=chosen;verdictRootName=chosen.name||'';await persistVerdictRootHandle(chosen);updateSaveRootUi();
+    await syncExistingDecisionsToRoot(chosen);
+    return chosen;
+  }catch(err){if(err?.name!=='AbortError')alert('저장 위치를 여는 중 문제가 생겼습니다: '+err);return null;}
+  finally{saveBusy=false;setAcceptButtonsDisabled(false);}
+}
+
 function setAcceptButtonsDisabled(disabled){
   ['#finishFolders','#resetSaveRoot'].forEach(sel=>{
     const b=$(sel); if(b) b.disabled=disabled;
   });
 }
 async function getVerdictRootHandle(){
-  if(verdictRootHandle) return verdictRootHandle;
-  if(saveBusy) return null;
-  if(!('showDirectoryPicker' in window)){
-    alert('현재 브라우저는 폴더 저장을 지원하지 않습니다. Chrome 또는 Edge에서 실행해 주세요.');
-    return null;
+  if(verdictRootHandle){
+    if(await permissionForHandle(verdictRootHandle,false))return verdictRootHandle;
+    if(await permissionForHandle(verdictRootHandle,true))return verdictRootHandle;
+    verdictRootHandle=null;updateSaveRootUi('저장 위치 다시 승인 필요');
   }
-  saveBusy=true;
-  setAcceptButtonsDisabled(true);
-  try{
-    verdictRootHandle=await window.showDirectoryPicker({mode:'readwrite'});
-    return verdictRootHandle;
-  }catch(err){
-    if(err?.name!=='AbortError') alert('저장소를 여는 중 문제가 생겼습니다: '+err);
-    return null;
-  }finally{
-    saveBusy=false;
-    setAcceptButtonsDisabled(false);
-  }
+  return await chooseVerdictRootHandle();
 }
 
 function listTargets(){
@@ -1234,6 +1317,7 @@ function openFinishSheet(){
 }
 function closeFinishSheet(){if(!$('#finishSheet'))return;$('#finishSheet').classList.remove('open');$('#finishSheet').setAttribute('aria-hidden','true');}
 async function organizeAllFolders(){
+  await instantSaveQueue;
   const root=await getVerdictRootHandle(); if(!root)return;
   const groups=[['GO',rowsBy('keep').map(x=>x.f)],['HOLD',rowsBy('hold').map(x=>x.f)],['DROP',rowsBy('kill').map(x=>x.f)]];if(godEyeActive)groups.push(['신의눈_흐림후보',files.filter(f=>!decisions.has(keyOf(f))&&godEyeBlur.has(keyOf(f)))]);if(momentActive)groups.push(['찰나_비선택',files.filter(f=>!decisions.has(keyOf(f))&&momentSkipped.has(keyOf(f))&&!(godEyeActive&&godEyeBlur.has(keyOf(f)))) ]);
   saveBusy=true;setAcceptButtonsDisabled(true);
@@ -1243,13 +1327,14 @@ async function organizeAllFolders(){
       const dir=await root.getDirectoryHandle(folderName,{create:true});
       for(const f of rows){await writeFileWithRelativePath(dir,f);}
     }
-    showToast('폴더 정리 완료 · 선택 + 자동셀렉');haptic(30);
+    showToast('저장 상태 동기화 완료');haptic(30);
   }catch(err){alert('폴더 정리 중 문제가 생겼습니다: '+err);}
   finally{saveBusy=false;setAcceptButtonsDisabled(false);}
 }
 function decide(status){
   const f=currentFile(); if(!f)return;
   decisions.set(keyOf(f),status);
+  queueInstantDecisionSave(f,status);
   criminalRecords.set(keyOf(f),status);
   criminalRecords.set(legacyKeyOf(f),status);
   scheduleSaveRecords();haptic(12);
@@ -1654,10 +1739,10 @@ function openResults(){
 $('#submitBtn').onclick=openResults;
 $('#backBtn').onclick=()=>{clearResultThumbUrls();results.classList.remove('show');};
 
-$('#resetSaveRoot').onclick=()=>{
+$('#resetSaveRoot').onclick=async()=>{
   if(saveBusy){alert('저장 처리가 끝난 뒤 다시 눌러주세요.');return;}
-  verdictRootHandle=null;
-  alert('저장소 기억을 비웠습니다. 다음 폴더 정리 때 저장 폴더를 다시 고릅니다.');
+  verdictRootHandle=null;verdictRootName='';await clearPersistedVerdictRootHandle();updateSaveRootUi();
+  alert('저장 위치 기억을 비웠습니다. 새 저장 위치를 지정해 주세요.');
 };
 
 $('#csvBtn').onclick=()=>{
@@ -1673,7 +1758,10 @@ $('#csvBtn').onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(u),1200);
 };
 
-window.addEventListener('beforeunload',()=>{scheduleSaveSession();clearCache();});
+window.addEventListener('beforeunload',e=>{
+  scheduleSaveSession();clearCache();
+  if(pendingInstantSaves>0){e.preventDefault();e.returnValue='';}
+});
 
 // PWA install flow
 let deferredInstallPrompt=null;
@@ -1750,7 +1838,8 @@ const optBgm=$('#optBgm'),mOptBgm=$('#mOptBgm');
 function syncBgmPrefs(value){mobilePrefs.bgm=!!value;if(optBgm)optBgm.checked=mobilePrefs.bgm;if(mOptBgm)mOptBgm.checked=mobilePrefs.bgm;saveMobilePrefs();if(!mobilePrefs.bgm)stopGodEyeBgm(true);}
 if(optBgm){optBgm.checked=mobilePrefs.bgm;optBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
 if(mOptBgm){mOptBgm.checked=mobilePrefs.bgm;mOptBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
-if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();verdictRootHandle=null;const h=await getVerdictRootHandle();if(h)showToast('정리 폴더 선택 완료');};
+if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();await chooseVerdictRootHandle(true);};
+if($('#saveRootBtn')) $('#saveRootBtn').onclick=async()=>{await chooseVerdictRootHandle(true);};
 if($('#finishClose')) $('#finishClose').onclick=closeFinishSheet;
 document.querySelectorAll('[data-close-finish]').forEach(el=>el.onclick=closeFinishSheet);
 if($('#finishResults')) $('#finishResults').onclick=()=>{closeFinishSheet();openResults();};
@@ -1763,6 +1852,8 @@ let touchStartX=0,touchStartY=0,touchStartAt=0;
 stage.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;touchStartAt=Date.now();},{passive:true});
 stage.addEventListener('touchend',e=>{if(!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touchStartX;const dy=e.changedTouches[0].clientY-touchStartY;const dt=Date.now()-touchStartAt;if(dt<550&&Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.4){dx<0?move(1):move(-1);}},{passive:true});
 
+
+restoreVerdictRootHandle();
 
 window.__photoJudgeDebug={
   get fileCount(){return files.length;},
@@ -1787,7 +1878,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   });
 }
 
-// v2.3.7: desktop bottom dock follows actual rendered height.
+// v2.3.8: desktop bottom dock follows actual rendered height.
 function syncDesktopDockLayout(){
   if(window.matchMedia('(max-width: 860px)').matches)return;
   const root=document.documentElement;
