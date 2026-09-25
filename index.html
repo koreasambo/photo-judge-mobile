@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.4.0</title>
+<title>사진판정소 · v2.4.2</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -323,7 +323,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
 }
 
 
-/* v2.4.0 import + fixed desktop button dock */
+/* v2.4.2 import + fixed desktop button dock */
 button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:pointer}
 .drawerItem.photoPickBtn,.drawerItem.folderPickBtn{font:inherit;cursor:pointer}
 @media (min-width:861px){
@@ -407,6 +407,36 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
 }
 
 
+
+
+/* ===== v2.4.2 TEMP PREVIEW ADJUST ===== */
+#adjustSheet{position:fixed;z-index:88;display:none}
+#adjustSheet.open{display:block}
+.adjustPanel{background:#211f1cf2;color:#f3ead8;border:1px solid #4a443c;border-radius:18px;box-shadow:0 18px 54px #0009;padding:14px;width:280px;backdrop-filter:blur(10px)}
+.adjustHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.adjustHead strong{font-size:14px}.adjustHead span{font-size:9px;color:#9d9387;display:block;margin-top:2px}
+.adjustClose{width:34px;height:34px;border:1px solid #4c453d;background:#2b2823;color:#ddd0bd;border-radius:11px;font-size:20px;cursor:pointer}
+.adjustRow{display:grid;grid-template-columns:68px 1fr 44px;gap:8px;align-items:center;margin:10px 0;font-size:11px;font-weight:850}
+.adjustRow input[type=range]{width:100%;accent-color:#b49b70}
+.adjustValue{font-variant-numeric:tabular-nums;text-align:right;color:#d8cbb8;font-size:10px}
+.adjustActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.adjustBtn{height:38px;border-radius:11px;border:1px solid #4b453d;background:#2b2823;color:#eee1ce;font-weight:900;cursor:pointer}
+.adjustBtn.active{background:#76564e;border-color:#a87669;color:#fff}
+.adjustNote{margin-top:9px;font-size:8.5px;line-height:1.45;color:#91877b;text-align:center}
+#adjustToggleBtn{width:100%;margin-top:8px;background:#34302b;border-color:#665b4f}
+#photo.tempAdjustOff{filter:none!important}
+@media(min-width:861px){
+  #adjustSheet{right:220px;top:50%;transform:translateY(-50%)}
+}
+@media(max-width:860px){
+  #adjustSheet{inset:0;z-index:96;background:#2b241e70;backdrop-filter:blur(4px)}
+  #adjustSheet.open{display:flex;align-items:flex-end;justify-content:center}
+  .adjustPanel{width:100%;max-width:520px;border-radius:26px 26px 0 0;border-color:#dfd2c3;background:#fffaf2;color:#332c26;padding:18px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px #4d3b2d30}
+  .adjustHead span,.adjustNote{color:#97897c}.adjustClose{background:#eee2d4;border:0;color:#5e5044}
+  .adjustRow{grid-template-columns:72px 1fr 44px;font-size:12px}.adjustValue{color:#66594e}
+  .adjustBtn{background:#fffdf8;color:#40372f;border-color:#dfd2c3}.adjustBtn.active{background:#9d645f;border-color:#9d645f;color:#fff}
+}
+
 </style>
 </head>
 <body>
@@ -484,7 +514,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   initialSplash();
 })();
 </script>
-<audio id="godEyeAudio" src="./god_eye_bgm.mp3" preload="auto"></audio>
+<audio id="godEyeAudio" src="./god_eye_bgm.mp3" preload="auto" loop></audio>
 <div id="app">
   <div id="copyLT" class="corner-copy">오늘도 많이 찍었다</div>
   <div id="copyRT" class="corner-copy">비슷해 보여도 남는 건 다르다</div>
@@ -493,7 +523,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.4.0 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.4.2 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -521,7 +551,8 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
       <label class="drawerToggle"><span>촬영정보 표시</span><input id="mOptResume" type="checkbox"></label>
       <label class="drawerToggle"><span>썸네일 보기</span><input id="mOptThumb" type="checkbox"></label>
       <label class="drawerToggle"><span>버튼 진동</span><input id="mOptVibrate" type="checkbox" checked></label>
-      <label class="drawerToggle"><span>신의 눈 BGM</span><input id="mOptBgm" type="checkbox" checked></label>
+      <label class="drawerToggle"><span>BGM</span><input id="mOptBgm" type="checkbox" checked></label>
+      <button id="mAdjustBtn" class="drawerItem"><b>임시 보정</b><span>밝기·대비·그림자·하이라이트를 화면에서만 조절</span></button>
       <button id="mSaveRoot" class="drawerItem"><b>저장 위치 지정</b><span id="mSaveRootSub">선택 즉시 GO / HOLD / DROP 폴더로 저장</span></button>
       <button id="mEndTrial" class="drawerDanger">현재 작업 종료</button>
       <div class="drawerFoot">로컬 사진은 서버로 올리지 않습니다. 신의 눈과 찰나의 선택은 기기 안에서만 살펴보며 원본은 건드리지 않습니다. 구름저장소는 필요한 사진만 불러옵니다.</div>
@@ -555,6 +586,11 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
     <div class="shortRow"><span class="keycap">2</span><span>HOLD</span></div>
     <div class="shortRow"><span class="keycap">3</span><span>DROP</span></div>
     <div class="shortRow"><span class="keycap">Z</span><span>100% / 맞춤</span></div>
+    <div class="shortRow"><span class="keycap">[ / ]</span><span>밝기 − / +</span></div>
+    <div class="shortRow"><span class="keycap">{ / }</span><span>대비 − / +</span></div>
+    <div class="shortRow"><span class="keycap">- / =</span><span>그림자 − / +</span></div>
+    <div class="shortRow"><span class="keycap">_ / +</span><span>하이라이트 − / +</span></div>
+    <div class="shortRow"><span class="keycap">V / 0</span><span>원본비교 / 초기화</span></div>
   </aside>
 
   <aside id="viewBox">
@@ -563,13 +599,36 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
     <label class="opt"><input id="optResume" type="checkbox">촬영정보 표시</label>
     <label class="opt"><input id="optThumb" type="checkbox">썸네일 보기</label>
     <label class="opt"><input id="optCinema" type="checkbox">영화관 모드</label>
-    <label class="opt"><input id="optBgm" type="checkbox" checked>신의 눈 BGM</label>
+    <label class="opt"><input id="optBgm" type="checkbox" checked>BGM</label>
+    <button id="adjustToggleBtn" class="btn smallBtn">임시 보정</button>
     <button id="saveRootBtn" class="btn smallBtn" style="width:100%;margin-top:9px">저장 위치 지정</button>
     <div id="saveRootStatus" style="margin-top:7px;font-size:10px;line-height:1.35;color:#b9aa98;text-align:center">저장 위치 미지정</div>
     <button id="recoverBtn" class="btn smallBtn" style="width:100%;margin-top:8px">이전 선택 복구</button>
     <div id="recoverStatus" style="margin-top:6px;font-size:9px;line-height:1.35;color:#b9aa98;text-align:center">저장 기록 검사 중…</div>
     <div id="zoomBadge">맞춤 보기 · 휠 확대 · 드래그 이동</div>
   </aside>
+
+  <div id="adjustSheet" aria-hidden="true">
+    <section class="adjustPanel" role="dialog" aria-modal="false" aria-labelledby="adjustTitle">
+      <div class="adjustHead"><div><strong id="adjustTitle">임시 보정</strong><span>원본 파일은 바뀌지 않습니다.</span></div><button id="adjustClose" class="adjustClose" aria-label="닫기">×</button></div>
+      <label class="adjustRow"><span>밝기</span><input id="adjBrightness" type="range" min="-100" max="100" step="5" value="0"><b id="adjBrightnessVal" class="adjustValue">0</b></label>
+      <label class="adjustRow"><span>대비</span><input id="adjContrast" type="range" min="-100" max="100" step="5" value="0"><b id="adjContrastVal" class="adjustValue">0</b></label>
+      <label class="adjustRow"><span>그림자</span><input id="adjShadows" type="range" min="-100" max="100" step="5" value="0"><b id="adjShadowsVal" class="adjustValue">0</b></label>
+      <label class="adjustRow"><span>하이라이트</span><input id="adjHighlights" type="range" min="-100" max="100" step="5" value="0"><b id="adjHighlightsVal" class="adjustValue">0</b></label>
+      <div class="adjustActions"><button id="adjustCompare" class="adjustBtn active">보정 보기</button><button id="adjustReset" class="adjustBtn">초기화</button></div>
+      <div class="adjustNote">PC 단축키 · [ ] 밝기 · { } 대비 · - = 그림자 · _ + 하이라이트 · V 비교 · 0 초기화</div>
+    </section>
+  </div>
+
+  <svg aria-hidden="true" width="0" height="0" style="position:absolute;pointer-events:none">
+    <filter id="tempToneFilter" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR id="tempToneR" type="table" tableValues="0 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5 0.5625 0.625 0.6875 0.75 0.8125 0.875 0.9375 1"/>
+        <feFuncG id="tempToneG" type="table" tableValues="0 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5 0.5625 0.625 0.6875 0.75 0.8125 0.875 0.9375 1"/>
+        <feFuncB id="tempToneB" type="table" tableValues="0 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5 0.5625 0.625 0.6875 0.75 0.8125 0.875 0.9375 1"/>
+      </feComponentTransfer>
+    </filter>
+  </svg>
 
   <section id="bottom">
     <div id="statusbar">GO <b id="cKeep">0</b> · HOLD <b id="cHold">0</b> · DROP <b id="cKill">0</b> · 신의눈 <b id="cBlur">0</b> · 찰나제외 <b id="cMomentSkip">0</b> · 미선택 <b id="cNone">0</b></div><div id="batchHint" class="batchHint">일터 소환 = 폴더 전체 · 사진 소환 = 한 장 또는 여러 장 직접 선택</div>
@@ -697,7 +756,7 @@ const DRIVE_CONFIG={
 const $=s=>document.querySelector(s);
 const picker=$('#picker'), folderPicker=$('#folderPicker'), photo=$('#photo'), empty=$('#empty'), stage=$('#stage');
 
-// v2.4.0: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
+// v2.4.2: 폴더 선택과 개별 사진 선택을 완전히 분리한다.
 // 일부 PWA/모바일 브라우저에서 label-for 방식이 이전 선택기를 재사용하는 경우를 피하기 위해
 // 실제 버튼에서 각각의 input.click()을 직접 호출한다.
 if(picker){
@@ -774,7 +833,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.0`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.0 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.2 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -785,6 +844,52 @@ let finishShown=false;
 let saveTimer=null, recordSaveTimer=null;
 let criminalRecords=new Map(), priorAtImport=new Map();
 let fitScale=1, zoomScale=1, panX=0, panY=0, isPanning=false, panStartX=0, panStartY=0, panOriginX=0, panOriginY=0;
+
+let tempAdjust={brightness:0,contrast:0,shadows:0,highlights:0,enabled:true};
+const adjustSheet=$('#adjustSheet');
+const adjustInputs={brightness:$('#adjBrightness'),contrast:$('#adjContrast'),shadows:$('#adjShadows'),highlights:$('#adjHighlights')};
+const adjustVals={brightness:$('#adjBrightnessVal'),contrast:$('#adjContrastVal'),shadows:$('#adjShadowsVal'),highlights:$('#adjHighlightsVal')};
+function buildToneTable(){
+  const s=tempAdjust.shadows/100,h=tempAdjust.highlights/100,vals=[];
+  for(let i=0;i<=16;i++){
+    const x=i/16;
+    let y=x;
+    // Lift/crush darker tones, separately raise/recover brighter tones. This is preview-only.
+    const shadowWeight=Math.pow(1-x,2.15);
+    const highlightWeight=Math.pow(x,2.15);
+    y += (s>=0?0.30:0.22)*s*shadowWeight;
+    y += (h>=0?0.24:0.30)*h*highlightWeight;
+    vals.push(Math.max(0,Math.min(1,y)).toFixed(4));
+  }
+  return vals.join(' ');
+}
+function applyTempAdjust(){
+  if(!photo)return;
+  for(const [k,input] of Object.entries(adjustInputs)){
+    if(input && Number(input.value)!==tempAdjust[k]) input.value=String(tempAdjust[k]);
+    if(adjustVals[k]) adjustVals[k].textContent=(tempAdjust[k]>0?'+':'')+tempAdjust[k];
+  }
+  const cmp=$('#adjustCompare');if(cmp){cmp.classList.toggle('active',tempAdjust.enabled);cmp.textContent=tempAdjust.enabled?'원본 보기':'보정 보기';}
+  if(!tempAdjust.enabled){photo.style.filter='none';photo.classList.add('tempAdjustOff');return;}
+  photo.classList.remove('tempAdjustOff');
+  const table=buildToneTable();
+  for(const id of ['#tempToneR','#tempToneG','#tempToneB']){const el=$(id);if(el)el.setAttribute('tableValues',table);}
+  const b=Math.max(.35,1+tempAdjust.brightness/100*.65);
+  const c=Math.max(.35,1+tempAdjust.contrast/100*.65);
+  photo.style.filter=`url(#tempToneFilter) brightness(${b.toFixed(3)}) contrast(${c.toFixed(3)})`;
+}
+function setTempAdjust(name,value,{toast=false}={}){
+  tempAdjust[name]=Math.max(-100,Math.min(100,Math.round(value/5)*5));
+  applyTempAdjust();
+  if(toast)showToast(`${({brightness:'밝기',contrast:'대비',shadows:'그림자',highlights:'하이라이트'})[name]} ${(tempAdjust[name]>0?'+':'')+tempAdjust[name]}`);
+}
+function resetTempAdjust(show=true){
+  tempAdjust.brightness=tempAdjust.contrast=tempAdjust.shadows=tempAdjust.highlights=0;tempAdjust.enabled=true;applyTempAdjust();if(show)showToast('임시 보정 초기화');
+}
+function toggleTempCompare(){tempAdjust.enabled=!tempAdjust.enabled;applyTempAdjust();showToast(tempAdjust.enabled?'보정 보기':'원본 보기');}
+function openAdjustSheet(){adjustSheet?.classList.add('open');adjustSheet?.setAttribute('aria-hidden','false');applyTempAdjust();}
+function closeAdjustSheet(){adjustSheet?.classList.remove('open');adjustSheet?.setAttribute('aria-hidden','true');}
+
 
 // ===== v2.1 AUTO SELECT : 신의 눈 / 찰나의 선택 =====
 let qualityMetrics=new Map();
@@ -895,7 +1000,7 @@ function showGodEyePassed(){godEyeActive=true;momentActive=false;setReviewIndice
 function showGodEyeBlur(){godEyeActive=false;momentActive=false;setReviewIndices(files.map((_,i)=>i).filter(i=>godEyeBlur.has(keyOf(files[i]))),'신의 눈 흐림');closeAutoLab();countStatus();showToast(`흐림 후보 · ${reviewIndices.length.toLocaleString()}장`);}
 async function writeFileWithRelativePath(baseDir,file){let dir=baseDir;const parts=pathOf(file).split('/').filter(Boolean);if(parts.length>1)parts.shift();for(const part of parts.slice(0,-1)){dir=await dir.getDirectoryHandle(part.replace(/[\\/:*?"<>|]/g,'_'),{create:true});}const name=(parts.at(-1)||file.name).replace(/[\\/:*?"<>|]/g,'_');const h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(file);await w.close();}
 async function exportGodEyeBlur(){const rows=files.filter(f=>godEyeBlur.has(keyOf(f)));if(!rows.length){showToast('흐림 후보가 없습니다.');return;}const root=await getVerdictRootHandle();if(!root)return;analysisRunning=true;try{const dir=await root.getDirectoryHandle('신의눈_흐림후보',{create:true});let n=0;for(const f of rows){await writeFileWithRelativePath(dir,f);n++;autoProgressText.textContent=`격리 복사 ${n}/${rows.length}`;}showToast(`신의 눈 · ${rows.length}장 복사 완료`);}catch(e){alert('신의 눈 후보 복사 중 문제가 생겼습니다: '+e);}finally{analysisRunning=false;}}
-async function runGodEye(){const bgmPromise=startGodEyeBgm();if(!(await ensureQualityAnalysis('신의 눈'))){stopGodEyeBgm(true);return;}await bgmPromise;classifyGodEye();const pass=files.length-godEyeBlur.size;finishAutoPanel(`흔들리는 사진 속에서 네 모습이 떠올라\n확실하게 흐린 후보만 따로 모았습니다.`);stopGodEyeBgm();setAutoStats([['전체',files.length],['흐림 후보',godEyeBlur.size],['통과',pass]]);autoPrimary.style.display='block';autoPrimary.textContent='흐림 제외하고 보기';autoPrimary.onclick=showGodEyePassed;autoSecondary.style.display='block';autoSecondary.textContent='흐림 후보만 보기';autoSecondary.onclick=showGodEyeBlur;autoExport.style.display=godEyeBlur.size?'block':'none';autoExport.textContent='신의 눈 후보 따로 복사';autoExport.onclick=exportGodEyeBlur;updateAutoBadge();}
+async function runGodEye(){if(mobilePrefs.bgm&&bgmUnlocked)void startAppBgm({quiet:true});if(!(await ensureQualityAnalysis('신의 눈')))return;classifyGodEye();const pass=files.length-godEyeBlur.size;finishAutoPanel(`흔들리는 사진 속에서 네 모습이 떠올라\n확실하게 흐린 후보만 따로 모았습니다.`);setAutoStats([['전체',files.length],['흐림 후보',godEyeBlur.size],['통과',pass]]);autoPrimary.style.display='block';autoPrimary.textContent='흐림 제외하고 보기';autoPrimary.onclick=showGodEyePassed;autoSecondary.style.display='block';autoSecondary.textContent='흐림 후보만 보기';autoSecondary.onclick=showGodEyeBlur;autoExport.style.display=godEyeBlur.size?'block':'none';autoExport.textContent='신의 눈 후보 따로 복사';autoExport.onclick=exportGodEyeBlur;updateAutoBadge();}
 function burstPair(a,b){const fa=files[a],fb=files[b],ma=qualityMetrics.get(keyOf(fa)),mb=qualityMetrics.get(keyOf(fb));if(!ma||!mb||ma.error||mb.error)return false;if(dirnameOf(fa)!==dirnameOf(fb))return false;const sa=fileSeqInfo(fa),sb=fileSeqInfo(fb);const ng=(sa.num!=null&&sb.num!=null&&sa.prefix===sb.prefix)?Math.abs(sb.num-sa.num):999;const dt=Math.abs((mb.captureTime||0)-(ma.captureTime||0));const visual=hammingSignature(ma.signature,mb.signature);let timeOK=false;if(ma.timeSource==='exif'&&mb.timeSource==='exif')timeOK=dt<=2200;else timeOK=(dt<=2500&&ng<=3)||(dt===0&&ng<=2);return timeOK&&visual<=24&&(ng<=4||ma.timeSource==='exif');}
 function buildBurstGroups(){burstGroups=[];burstInfoByIndex.clear();burstBestIndices.clear();momentSkipped.clear();let cur=[];const flush=()=>{if(cur.length>=2){for(let s=0;s<cur.length;s+=30){const chunk=cur.slice(s,s+30);if(chunk.length>=2)burstGroups.push(chunk);}}cur=[];};for(let i=0;i<files.length;i++){if(!cur.length)cur=[i];else if(burstPair(cur[cur.length-1],i))cur.push(i);else{flush();cur=[i];}}flush();burstGroups.forEach((group,gi)=>{const vals=group.map(i=>Math.log1p(qualityMetrics.get(keyOf(files[i]))?.bestZone||0));const mn=Math.min(...vals),mx=Math.max(...vals);let best=group[0],bestScore=-1;group.forEach((i,pos)=>{const m=qualityMetrics.get(keyOf(files[i]));const sharp=mx>mn?(Math.log1p(m.bestZone)-mn)/(mx-mn):.5;const contrast=clamp(m.contrast/62);const score=.72*sharp+.20*m.exposure+.08*contrast-(godEyeBlur.has(keyOf(files[i]))?.5:0);if(score>bestScore){bestScore=score;best=i;}burstInfoByIndex.set(i,{group:gi+1,pos:pos+1,size:group.length,bestIndex:null,score});});burstBestIndices.add(best);for(const i of group){const x=burstInfoByIndex.get(i);x.bestIndex=best;if(i!==best)momentSkipped.add(keyOf(files[i]));}});}
 function momentFocusIndices(bestOnly=false){const member=new Set();for(const g of burstGroups)for(const i of g)member.add(i);const out=[];for(let i=0;i<files.length;i++){if(godEyeActive&&godEyeBlur.has(keyOf(files[i])))continue;if(member.has(i)){if(burstBestIndices.has(i))out.push(i);}else if(!bestOnly)out.push(i);}return out;}
@@ -1095,56 +1200,58 @@ function haptic(ms=12){if(mobilePrefs.vibrate && navigator.vibrate) try{navigato
 const godEyeAudio=$('#godEyeAudio');
 let godEyeFadeTimer=null;
 let godEyeAudioState='idle';
-let godEyeStartedAt=0;
-let godEyeStopTimer=0;
-async function startGodEyeBgm(){
-  if(!godEyeAudio)return false;
-  if(!mobilePrefs.bgm){showToast('신의 눈 BGM · 설정에서 꺼져 있습니다.');return false;}
+let bgmUnlocked=false;
+const APP_BGM_VOLUME=.24;
+async function startAppBgm({restart=false,quiet=false}={}){
+  if(!godEyeAudio||!mobilePrefs.bgm)return false;
   clearInterval(godEyeFadeTimer);
   try{
+    if(!godEyeAudio.paused && !godEyeAudio.ended){
+      godEyeAudioState='playing';
+      return true;
+    }
     godEyeAudioState='starting';
-    godEyeAudio.pause();
-    godEyeAudio.currentTime=0;
+    godEyeAudio.loop=true;
     godEyeAudio.muted=false;
-    godEyeAudio.volume=.04;
-    godEyeAudio.load();
+    if(restart) try{godEyeAudio.currentTime=0;}catch{}
+    godEyeAudio.volume=.025;
     await godEyeAudio.play();
     godEyeAudioState='playing';
-    godEyeStartedAt=Date.now();
-    let v=godEyeAudio.volume||.04;
+    let v=godEyeAudio.volume||.025;
     godEyeFadeTimer=setInterval(()=>{
-      v=Math.min(.34,v+.025);
+      v=Math.min(APP_BGM_VOLUME,v+.018);
       try{godEyeAudio.volume=v;}catch{}
-      if(v>=.34){clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;}
-    },80);
+      if(v>=APP_BGM_VOLUME){clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;}
+    },90);
     return true;
   }catch(err){
-    godEyeAudioState='error';
-    console.warn('신의 눈 BGM 재생 실패',err);
-    showToast('BGM 재생 실패 · 미디어 음량 또는 브라우저 권한을 확인하세요.');
+    godEyeAudioState='blocked';
+    console.warn('앱 BGM 재생 대기/실패',err);
+    if(!quiet) showToast('BGM은 화면을 한 번 터치하면 재생됩니다.');
     return false;
   }
 }
-function stopGodEyeBgm(force=false){
+function stopAppBgm(){
   if(!godEyeAudio)return;
-  clearTimeout(godEyeStopTimer);
-  if(!force && !godEyeAudio.paused && godEyeStartedAt){
-    const remain=4000-(Date.now()-godEyeStartedAt);
-    if(remain>0){godEyeStopTimer=setTimeout(()=>stopGodEyeBgm(true),remain);return;}
-  }
-  clearInterval(godEyeFadeTimer);
-  if(godEyeAudio.paused){try{godEyeAudio.currentTime=0;}catch{};godEyeAudioState='idle';return;}
-  godEyeFadeTimer=setInterval(()=>{
-    const v=Math.max(0,(godEyeAudio.volume||0)-.035);
-    try{godEyeAudio.volume=v;}catch{}
-    if(v<=0){
-      clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;
-      try{godEyeAudio.pause();godEyeAudio.currentTime=0;}catch{}
-      godEyeAudioState='idle';godEyeStartedAt=0;
-    }
-  },70);
+  clearInterval(godEyeFadeTimer);godEyeFadeTimer=null;
+  try{godEyeAudio.pause();}catch{}
+  godEyeAudioState='paused';
 }
-
+function unlockAndStartBgm(){
+  bgmUnlocked=true;
+  if(mobilePrefs.bgm) void startAppBgm({quiet:true});
+}
+document.addEventListener('pointerdown',unlockAndStartBgm,{capture:true,once:true});
+document.addEventListener('keydown',unlockAndStartBgm,{capture:true,once:true});
+document.addEventListener('touchstart',unlockAndStartBgm,{capture:true,once:true,passive:true});
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden && bgmUnlocked && mobilePrefs.bgm){
+    setTimeout(()=>{void startAppBgm({quiet:true});},120);
+  }
+});
+window.addEventListener('pageshow',()=>{
+  if(bgmUnlocked && mobilePrefs.bgm) setTimeout(()=>{void startAppBgm({quiet:true});},120);
+});
 
 function scheduleSaveSession(){
   clearTimeout(saveTimer);
@@ -1419,6 +1526,7 @@ function render(){
 
   photo.onload=()=>{
     empty.style.display='none'; photo.style.display='block';
+    applyTempAdjust();
     resetZoom();
     resume.textContent=`${photo.naturalWidth}×${photo.naturalHeight} · ${humanSize(f.size)} · ${niceDate(f.lastModified)}`;
   };
@@ -1771,13 +1879,25 @@ function drivePickerCallback(data){
   }
 }
 
+
+for(const [name,input] of Object.entries(adjustInputs)){
+  input?.addEventListener('input',()=>setTempAdjust(name,Number(input.value)));
+}
+$('#adjustToggleBtn')?.addEventListener('click',openAdjustSheet);
+$('#mAdjustBtn')?.addEventListener('click',()=>{try{$('#mobileDrawer')?.classList.remove('open');$('#mobileDrawer')?.setAttribute('aria-hidden','true');}catch{}openAdjustSheet();});
+$('#adjustClose')?.addEventListener('click',closeAdjustSheet);
+adjustSheet?.addEventListener('click',e=>{if(e.target===adjustSheet)closeAdjustSheet();});
+$('#adjustReset')?.addEventListener('click',()=>resetTempAdjust(true));
+$('#adjustCompare')?.addEventListener('click',toggleTempCompare);
+
 keepBtn.onclick=()=>decide('keep');
 holdBtn.onclick=()=>decide('hold');
 killBtn.onclick=()=>decide('kill');
 
 document.addEventListener('keydown',e=>{
   if(results.classList.contains('show'))return;
-  if(e.target && ['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+  if(e.target?.tagName==='TEXTAREA')return;
+  if(e.target?.tagName==='INPUT' && e.target.type!=='range')return;
   const k=e.key.toLowerCase();
   if(k==='d' || e.key==='ArrowRight'){e.preventDefault();move(1);}
   else if(k==='a' || e.key==='ArrowLeft'){e.preventDefault();move(-1);}
@@ -1786,6 +1906,17 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='3'){e.preventDefault();decide('kill');}
   else if(e.code==='Space'){e.preventDefault();move(1);}
   else if(k==='z'){e.preventDefault();toggleHundred();}
+  else if(e.key==='['){e.preventDefault();setTempAdjust('brightness',tempAdjust.brightness-5,{toast:true});}
+  else if(e.key===']'){e.preventDefault();setTempAdjust('brightness',tempAdjust.brightness+5,{toast:true});}
+  else if(e.key==='{'){e.preventDefault();setTempAdjust('contrast',tempAdjust.contrast-5,{toast:true});}
+  else if(e.key==='}'){e.preventDefault();setTempAdjust('contrast',tempAdjust.contrast+5,{toast:true});}
+  else if(e.key==='-'){e.preventDefault();setTempAdjust('shadows',tempAdjust.shadows-5,{toast:true});}
+  else if(e.key==='='){e.preventDefault();setTempAdjust('shadows',tempAdjust.shadows+5,{toast:true});}
+  else if(e.key==='_'){e.preventDefault();setTempAdjust('highlights',tempAdjust.highlights-5,{toast:true});}
+  else if(e.key==='+'){e.preventDefault();setTempAdjust('highlights',tempAdjust.highlights+5,{toast:true});}
+  else if(k==='v'){e.preventDefault();toggleTempCompare();}
+  else if(e.key==='0'){e.preventDefault();resetTempAdjust(true);}
+  else if(e.key==='Escape'&&adjustSheet?.classList.contains('open')){e.preventDefault();closeAdjustSheet();}
   else if(e.key==='Escape'&&reviewIndices){reviewIndices=null;reviewMode=null;idx=0;render();}
 });
 
@@ -1967,7 +2098,7 @@ function bindMirror(mobileSel,desktopSel,after){
 bindMirror('#mOptName','#optName');bindMirror('#mOptResume','#optResume');bindMirror('#mOptThumb','#optThumb');
 if($('#mOptVibrate')){ $('#mOptVibrate').checked=mobilePrefs.vibrate; $('#mOptVibrate').onchange=e=>{mobilePrefs.vibrate=e.target.checked;saveMobilePrefs();haptic(18);}; }
 const optBgm=$('#optBgm'),mOptBgm=$('#mOptBgm');
-function syncBgmPrefs(value){mobilePrefs.bgm=!!value;if(optBgm)optBgm.checked=mobilePrefs.bgm;if(mOptBgm)mOptBgm.checked=mobilePrefs.bgm;saveMobilePrefs();if(!mobilePrefs.bgm)stopGodEyeBgm(true);}
+function syncBgmPrefs(value){mobilePrefs.bgm=!!value;if(optBgm)optBgm.checked=mobilePrefs.bgm;if(mOptBgm)mOptBgm.checked=mobilePrefs.bgm;saveMobilePrefs();if(!mobilePrefs.bgm){stopAppBgm();}else{bgmUnlocked=true;void startAppBgm({quiet:false});}}
 if(optBgm){optBgm.checked=mobilePrefs.bgm;optBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
 if(mOptBgm){mOptBgm.checked=mobilePrefs.bgm;mOptBgm.onchange=e=>syncBgmPrefs(e.target.checked);}
 if($('#mSaveRoot')) $('#mSaveRoot').onclick=async()=>{closeDrawer();await chooseVerdictRootHandle(true);};
@@ -1996,7 +2127,7 @@ window.__photoJudgeDebug={
   scanStored(){return {count:scanAllStoredDecisionRecords().size,keys:[...scanAllStoredDecisionRecords().keys()]};},
   ingestFiles,
   recover:manualRecoverPreviousSelections,
-  get audio(){return godEyeAudio?{paused:godEyeAudio.paused,currentTime:godEyeAudio.currentTime,readyState:godEyeAudio.readyState,state:godEyeAudioState,bgmEnabled:mobilePrefs.bgm}:null;}
+  get audio(){return godEyeAudio?{paused:godEyeAudio.paused,currentTime:godEyeAudio.currentTime,readyState:godEyeAudio.readyState,state:godEyeAudioState,bgmEnabled:mobilePrefs.bgm,unlocked:bgmUnlocked,loop:godEyeAudio.loop}:null;}
 };
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   // v2.3 단일 통합판: 예전 /pc/·/mobile/ 전용 서비스워커가 남아 있으면 정리한다.
@@ -2006,7 +2137,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=240-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=242-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
@@ -2016,7 +2147,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   });
 }
 
-// v2.4.0: desktop bottom dock follows actual rendered height.
+// v2.4.2: desktop bottom dock follows actual rendered height.
 function syncDesktopDockLayout(){
   if(window.matchMedia('(max-width: 860px)').matches)return;
   const root=document.documentElement;
