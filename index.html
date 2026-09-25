@@ -331,27 +331,64 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   const sp=document.getElementById('splash');
   if(!sp)return;
   const img=sp.querySelector('img');
-  let started=false;
-  const startSplashClock=()=>{
-    if(started)return;
-    started=true;
+  let hideTimer=0;
+  let hiddenAt=0;
+  let skipNextResume=false;
+  let lastShownAt=0;
+
+  function showSplash(){
+    const now=Date.now();
+    // 같은 순간의 중복 이벤트(pageshow/visibilitychange)로 시간이 리셋되는 것을 막는다.
+    if(now-lastShownAt<700)return;
+    lastShownAt=now;
+    window.clearTimeout(hideTimer);
+    sp.classList.remove('hide');
+    sp.setAttribute('aria-hidden','false');
     requestAnimationFrame(()=>{
-      sp.classList.add('ready');
-      window.setTimeout(()=>{
-        sp.classList.add('hide');
-        window.setTimeout(()=>{if(sp&&sp.parentNode)sp.parentNode.removeChild(sp);},550);
-      },3500);
+      requestAnimationFrame(()=>{
+        sp.classList.add('ready');
+        hideTimer=window.setTimeout(()=>{
+          sp.classList.add('hide');
+          sp.setAttribute('aria-hidden','true');
+        },3500);
+      });
     });
-  };
-  if(!img){startSplashClock();return;}
-  if(img.complete){
-    if(img.decode) img.decode().catch(()=>{}).finally(startSplashClock);
-    else startSplashClock();
-  }else{
-    img.addEventListener('load',startSplashClock,{once:true});
-    img.addEventListener('error',startSplashClock,{once:true});
-    window.setTimeout(startSplashClock,5000);
   }
+
+  function initialSplash(){
+    if(!img){showSplash();return;}
+    if(img.complete){
+      if(img.decode) img.decode().catch(()=>{}).finally(showSplash);
+      else showSplash();
+    }else{
+      img.addEventListener('load',showSplash,{once:true});
+      img.addEventListener('error',showSplash,{once:true});
+      // 이미지 로딩이 비정상적으로 길어져도 검은 화면에 갇히지 않게 한다.
+      window.setTimeout(showSplash,5000);
+    }
+  }
+
+  // 파일 선택/Drive 인증에서 앱으로 돌아오는 경우에는 시작 스플래시를 다시 띄우지 않는다.
+  document.addEventListener('click',e=>{
+    const t=e.target.closest?.('label[for="picker"],label[for="folderPicker"],#mDrive,#mDriveImport,#driveImportBtn');
+    if(t)skipNextResume=true;
+  },true);
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){hiddenAt=Date.now();return;}
+    if(!hiddenAt)return;
+    const away=Date.now()-hiddenAt;
+    hiddenAt=0;
+    if(skipNextResume){skipNextResume=false;return;}
+    // 홈 화면/다른 앱에서 돌아오는 실제 재실행 느낌일 때 다시 보여준다.
+    if(away>=1200)showSplash();
+  });
+
+  // Android/Chrome이 페이지를 bfcache에서 복원하는 경우도 처리한다.
+  window.addEventListener('pageshow',e=>{if(e.persisted)showSplash();});
+
+  window.__photoJudgeShowSplash=showSplash;
+  initialSplash();
 })();
 </script>
 <audio id="godEyeAudio" src="./god_eye_bgm.mp3" preload="metadata"></audio>
@@ -363,7 +400,7 @@ header{position:absolute;z-index:6;left:50%;top:12px;transform:translateX(-50%);
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.3.2 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.3.3 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -573,7 +610,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.2 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.3.3 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -1535,7 +1572,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=231-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=233-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
