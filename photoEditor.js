@@ -5,12 +5,12 @@ const state={items:[],index:0,original:null,corrected:null,busy:false,preset:'be
 
 function api(){return window.__photoJudgeIntegration;}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function editedName(name){const i=name.lastIndexOf('.');return i<0?name+'_EDITED.jpg':name.slice(0,i)+'_EDITED'+name.slice(i);}
+function editedName(name){const i=name.lastIndexOf('.');const stem=i<0?name:name.slice(0,i);return stem+'_EDITED.jpg';}
 function setStatus(t){const el=$('#editorStatus');if(el)el.textContent=t;}
 function show(id){for(const x of ['photoHub','photoEditor']){const e=$('#'+x);if(e)e.classList.toggle('show',x===id);}}
 function goJudge(){show('');$('#app')?.classList.remove('hubHidden');$('#results')?.classList.remove('show');}
 function goHub(){show('photoHub');$('#app')?.classList.add('hubHidden');$('#results')?.classList.remove('show');}
-function goEditorDirect(){const A=api();if(!A){alert('사진판정소 연결이 준비되지 않았습니다.');return;}const all=A.getAllFiles().map((file,i)=>({file,index:i,status:A.getDecision(file)}));openEditor(all);}
+function goEditorDirect(){const A=api();if(!A){alert('사진판정소 연결이 준비되지 않았습니다.');return;}openEditor(A.getAllFiles());}
 function openEditorGO(){const A=api();if(!A)return;const items=A.getGoItems();if(!items.length){alert('GO 사진이 없습니다. 먼저 판정소에서 GO를 선택해 주세요.');return;}openEditor(items);}
 function openEditor(items){state.items=items;state.index=0;state.original=null;state.corrected=null;show('photoEditor');$('#app')?.classList.add('hubHidden');$('#results')?.classList.remove('show');renderEditor();}
 function current(){return state.items[state.index]||null;}
@@ -37,9 +37,9 @@ function updateButtons(){
   const prev=$('#editorPrev'),next=$('#editorNext');if(prev)prev.disabled=state.index<=0;if(next)next.disabled=state.index>=state.items.length-1;
 }
 function reset(){if(!state.original)return;const c=$('#editorCanvas');c.getContext('2d').putImageData(state.original,0,0);state.corrected=null;setStatus('원본 보기');}
-async function apply(){
-  if(!state.original||state.busy)return;
-  state.busy=true;setStatus('자동 보정 중...');
+async function apply(force=false){
+  if(!state.original||(state.busy&&!force))return;
+  const ownBusy=!state.busy;if(ownBusy)state.busy=true;setStatus('자동 보정 중...');
   await new Promise(r=>setTimeout(r,20));
   try{
     const input=new ImageData(new Uint8ClampedArray(state.original.data),state.original.width,state.original.height);
@@ -47,7 +47,7 @@ async function apply(){
     state.corrected=result.imageData;$('#editorCanvas').getContext('2d').putImageData(result.imageData,0,0);
     setStatus('보정 적용 · 역광 '+Math.round((result.meta.backlightScore||0)*100)+'%');
   }catch(e){console.error(e);setStatus('보정 오류');alert('보정 중 문제가 생겼습니다: '+e);}
-  finally{state.busy=false;}
+  finally{if(ownBusy)state.busy=false;}
 }
 async function canvasBlob(){
   const c=$('#editorCanvas');return await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('보정본 생성 실패')),'image/jpeg',.94));
@@ -69,7 +69,7 @@ async function saveAll(){
     const root=await A.getRootHandle();if(!root)return;
     const dir=await root.getDirectoryHandle('EDITOR_OUTPUT',{create:true});
     for(let i=0;i<state.items.length;i++){
-      state.index=i;await renderEditor();await apply();
+      state.index=i;await renderEditor();await apply(true);
       setStatus('전체 저장 중 · '+(i+1)+'/'+state.items.length);
       const blob=await canvasBlob(),it=current(),fh=await dir.getFileHandle(editedName(it.file.name),{create:true}),w=await fh.createWritable();
       await w.write(blob);await w.close();
