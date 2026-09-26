@@ -870,7 +870,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.5.0 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진 작업실 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.5.0`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.5.0 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -2184,7 +2184,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=242-photojudge',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=250-photojudge',{updateViaCache:'none'});
       await reg.update();
       let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
