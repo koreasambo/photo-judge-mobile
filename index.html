@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>사진판정소 · v2.4.2</title>
+<title>사진 작업실 · v2.5.0</title>
 <style>
 :root{
   --bg:#171614; --panel:#211f1c; --panel2:#292621; --line:#403b34;
@@ -437,6 +437,43 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   .adjustBtn{background:#fffdf8;color:#40372f;border-color:#dfd2c3}.adjustBtn.active{background:#9d645f;border-color:#9d645f;color:#fff}
 }
 
+
+/* ===== v2.5.0 사진 작업실 허브 + 사진보정소 ===== */
+.hubHidden{visibility:hidden!important;pointer-events:none!important}
+.photoHub,.photoEditor{display:none;position:fixed;inset:0;z-index:120;background:radial-gradient(circle at 50% 32%,#28231f 0,#171614 54%,#0d0c0b 100%);color:#f3ead8}
+.photoHub.show,.photoEditor.show{display:flex}
+.photoHub{align-items:center;justify-content:center;padding:24px}
+.hubCard{width:min(760px,92vw);padding:42px 30px;border:1px solid #52493f;border-radius:24px;background:#1f1c19e8;box-shadow:0 22px 80px #0008;text-align:center}
+.hubKicker{font-size:11px;letter-spacing:.22em;color:#b49b70;font-weight:900}
+.hubCard h1{margin:10px 0 5px;font-size:34px}.hubCard p{margin:0 0 24px;color:#aaa093}
+.hubButtons{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hubButtons button{min-height:122px;border:1px solid #5d554b;border-radius:16px;background:#292520;color:#f5ead8;font-size:21px;font-weight:950;cursor:pointer}
+.hubButtons button span{display:block;margin-top:7px;font-size:10px;color:#a99f90;font-weight:800}
+.hubButtons button:first-child{background:#4b2a30;border-color:#7b4a54}.hubButtons button:last-child{background:#473d28;border-color:#796744}
+.photoEditor{flex-direction:column}
+.editorHead{height:68px;display:grid;grid-template-columns:120px 1fr 120px;align-items:center;padding:0 18px;border-bottom:1px solid #39342d;background:#1b1916}
+.editorHead>div{text-align:center}.editorHead b{display:block;font-size:20px}.editorHead span{display:block;font-size:10px;color:#9d9387;margin-top:2px}
+.editorHead button,.editorSide button,.editorSide select{border:1px solid #554d44;background:#2b2722;color:#f0e4d2;border-radius:9px;min-height:42px;font-weight:900}
+.editorMain{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:0}
+.editorStage{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;background:#090909;overflow:auto;padding:18px}
+#editorCanvas{display:block;max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 12px 45px #000b}
+.editorSide{padding:16px;background:#211e1a;border-left:1px solid #3e3932;overflow:auto}
+.editorName{font-size:11px;color:#c6bbab;word-break:break-all;margin-bottom:15px}
+.editorSide label{display:grid;gap:6px;font-size:10px;color:#a99f90;margin-bottom:10px}
+.editorSide select{padding:0 10px;width:100%}.editorSide>button{width:100%;margin:5px 0;cursor:pointer}
+.editorSide .editorPrimary{background:#7b202c;border-color:#a23848}.editorSide .editorGold{background:#6a5930;border-color:#9f864b}
+.editorNav{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:5px 0}.editorNav button{cursor:pointer}
+.editorStatus{margin-top:12px;padding:10px;border:1px solid #403a33;border-radius:8px;background:#171513;color:#d8cbb8;font-size:10px;text-align:center}
+.editorHint{margin-top:10px;color:#8f8579;font-size:9px;line-height:1.55;text-align:center}
+#moveToEditorBtn{background:#6a5930;border-color:#9f864b}
+@media(min-width:861px){#bottom .actionRow{grid-template-columns:.85fr .85fr .95fr 1.12fr 1.05fr .95fr .95fr!important}}
+@media(max-width:860px){
+  .hubButtons{grid-template-columns:1fr}.hubButtons button{min-height:105px}.hubCard{padding:30px 18px}.hubCard h1{font-size:27px}
+  .editorHead{grid-template-columns:82px 1fr 82px;height:58px;padding:0 8px}.editorHead button{font-size:10px;min-width:0}.editorHead b{font-size:17px}
+  .editorMain{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}.editorStage{padding:8px}.editorSide{border-left:0;border-top:1px solid #3e3932;padding:10px;max-height:42dvh}
+  .editorSide label{margin-bottom:6px}.editorSide>button{min-height:38px}.editorHint{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -523,7 +560,7 @@ button.quickLoad{appearance:none;-webkit-appearance:none;padding:0 10px;cursor:p
   <header>
     <div class="brand">사진판정소</div>
     <div id="counter" class="counter">0000 / 0000</div>
-    <div id="modeLabel" class="subline">v2.4.2 · GO / HOLD / DROP</div>
+    <div id="modeLabel" class="subline">v2.5.0 · GO / HOLD / DROP</div>
   </header>
 
 
@@ -833,7 +870,7 @@ let saveBusy=false;
 let driveLibPromise=null, driveTokenClient=null, driveAccessToken=null, driveBusy=false, driveReady=false, driveInitError=null;
 const CACHE_LIMIT_NORMAL=9, CACHE_LIMIT_LARGE=5;
 const BUILD_MODE=window.matchMedia('(max-width:860px)').matches?'mobile':'pc';
-try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.2 · GO / HOLD / DROP`;}catch{}
+try{document.title=`사진판정소 · ${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.4.2`;const ml=document.getElementById('modeLabel');if(ml)ml.textContent=`${BUILD_MODE==='mobile'?'MOBILE':'PC'} v2.5.0 · GO / HOLD / DROP`;}catch{}
 const isLargeBatch=()=>files.length>=1000;
 const currentCacheLimit=()=>isLargeBatch()?CACHE_LIMIT_LARGE:CACHE_LIMIT_NORMAL;
 const SESSION_KEY='photoCourt.v2.3.session';
@@ -2119,6 +2156,16 @@ stage.addEventListener('touchend',e=>{if(!e.changedTouches.length)return;const d
 
 restoreVerdictRootHandle();
 
+window.__photoJudgeIntegration={
+  getAllFiles:()=>files.map((file,index)=>({file,index,status:decisions.get(keyOf(file))||null})),
+  getGoItems:()=>files.map((file,index)=>({file,index,status:decisions.get(keyOf(file))||null})).filter(x=>x.status==='keep'),
+  getDecision:file=>decisions.get(keyOf(file))||null,
+  getRootHandle:async()=>await getVerdictRootHandle(),
+  getRootName:()=>verdictRootName||'',
+  openResults:()=>openResults(),
+  showToast:msg=>showToast(msg)
+};
+
 window.__photoJudgeDebug={
   get fileCount(){return files.length;},
   get currentPath(){return currentFile()?pathOf(currentFile()):null;},
@@ -2184,5 +2231,6 @@ if(!FOLDER_PICK_SUPPORTED){
 render();
 })();
 </script>
+<script type="module" src="./photoEditor.js?v=250"></script>
 </body>
 </html>
