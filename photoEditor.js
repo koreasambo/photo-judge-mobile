@@ -90,7 +90,7 @@ function buildUI(){
     <header class="editorHead"><button id="editorBack">‹ 메인</button><div><b>사진보정소</b><span id="editorCounter">0 / 0</span></div><button id="editorJudgeBack">판정소</button></header>
     <main class="editorMain"><div class="editorStage"><canvas id="editorCanvas"></canvas></div>
       <aside class="editorSide"><div class="editorName" id="editorFileName"></div>
-        <label>보정 스타일<select id="editorPreset"><option value="beach_backlight">해변 역광</option><option value="photographer">Photographer</option><option value="natural">Natural</option><option value="rescue">Rescue</option></select></label>
+        <button id="editorLoad">사진 불러오기</button><input id="editorPicker" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.bmp" multiple hidden><label>보정 스타일<select id="editorPreset"><option value="beach_backlight">해변 역광</option><option value="photographer">Photographer</option><option value="natural">Natural</option><option value="rescue">Rescue</option></select></label>
         <button id="editorApply" class="editorPrimary">자동 보정</button><button id="editorReset">원본 보기</button>
         <div class="editorNav"><button id="editorPrev">이전</button><button id="editorNext">다음</button></div>
         <button id="editorSave">현재 보정본 저장</button><button id="editorSaveAll" class="editorGold">전체 자동보정 + 저장</button>
@@ -98,6 +98,7 @@ function buildUI(){
       </aside></main>
   </div>`);
   $('#hubJudge').onclick=goJudge;$('#hubEditor').onclick=goEditorDirect;$('#editorBack').onclick=goHub;$('#editorJudgeBack').onclick=goJudge;
+  $('#editorLoad').onclick=()=>$('#editorPicker').click();$('#editorPicker').onchange=e=>{const list=[...(e.target.files||[])].map((file,index)=>({file,index,status:null}));if(list.length)openEditor(list);};
   $('#editorApply').onclick=apply;$('#editorReset').onclick=reset;$('#editorSave').onclick=saveCurrent;$('#editorSaveAll').onclick=saveAll;
   $('#editorPrev').onclick=()=>{if(state.index>0){state.index--;renderEditor();}};$('#editorNext').onclick=()=>{if(state.index<state.items.length-1){state.index++;renderEditor();}};
   $('#editorPreset').onchange=e=>{state.preset=e.target.value;};
