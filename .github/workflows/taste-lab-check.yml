@@ -1,0 +1,25 @@
+name: Human Preference Lab syntax
+on:
+  pull_request:
+    paths:
+      - 'tasteLab.js'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/taste-lab-check.yml'
+  workflow_dispatch:
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check tasteLab.js && node --check sw.js
+      - name: Integration invariants
+        shell: bash
+        run: |
+          grep -q 'src="./tasteLab.js?v=251"' index.html
+          grep -q "'./tasteLab.js'" sw.js
+          grep -q 'photoJudge.tasteLab.v1' tasteLab.js
