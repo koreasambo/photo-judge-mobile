@@ -23,10 +23,13 @@
     return api.getAllFiles().filter(x=>x&&x.file&&typeof x.file.name==='string')
       .map(x=>({file:x.file,name:x.file.name,id:idOf(x.file),index:x.index}));
   }
+  function activeStage(){return $('tasteStage')?.value||'first';}
   function ratings(){
+    const stage=activeStage();
     const map=new Map(items.map(x=>[x.id,{elo:1500,n:0,w:0}]));
     let comparisons=0;
     for(const v of votes){
+      if((v.stage||'first')!==stage)continue;
       const a=map.get(v.a),b=map.get(v.b);
       if(!a||!b||a===b)continue;
       const expected=1/(1+Math.pow(10,(b.elo-a.elo)/400));
@@ -47,7 +50,7 @@
   }
   function pick(){
     if(items.length<2)return null;
-    const seen=new Set(votes.map(v=>pairId(v.a,v.b)));
+    const seen=new Set(votes.filter(v=>(v.stage||'first')===activeStage()).map(v=>pairId(v.a,v.b)));
     for(const k of skipped)seen.add(k);
     const candidates=[];
     for(let i=0;i<items.length-1;i++){
@@ -73,7 +76,7 @@
   }
   function showStats(){
     const r=ratings();
-    $('tasteStats').textContent=items.length+'장 · 현재 사진 집합의 비교 '+r.comparisons+'회 · 기록은 브라우저에만 보관';
+    $('tasteStats').textContent=items.length+'장 · '+(activeStage()==='first'?'첫인상':'보관·공유')+' 비교 '+r.comparisons+'회 · 기록은 브라우저에만 보관';
   }
   function next(){
     cleanup();showStats();const p=pick();
@@ -102,7 +105,7 @@
     cleanup();pair=null;$('tasteCompare').hidden=true;$('tasteRanking').hidden=false;
     $('tasteTabCompare').setAttribute('aria-selected','false');$('tasteTabRank').setAttribute('aria-selected','true');
     const r=ratings(),box=$('tasteRankRows');box.replaceChildren();
-    items.slice().sort((a,b)=>(r.map.get(b.id).elo-r.map.get(a.id).elo)||a.index-b.index).slice(0,80).forEach((item,i)=>{
+    items.slice().sort((a,b)=>((r.map.get(b.id).n>0)-(r.map.get(a.id).n>0))||(r.map.get(b.id).elo-r.map.get(a.id).elo)||a.index-b.index).slice(0,80).forEach((item,i)=>{
       const d=document.createElement('div'),s=r.map.get(item.id),name=document.createElement('span'),score=document.createElement('span');
       d.className='tasteRank';name.textContent=(i+1)+'. '+item.name;
       score.textContent=s.n?Math.round(s.elo)+'점 · '+s.n+'회'+(s.n<3?' (표본 부족)':''):'미평가';
@@ -175,7 +178,9 @@
       '<p id="tasteWarning"></p><button id="tasteExport">비교 기록 CSV 내보내기</button></section>';
     document.body.append(root);
     $('tasteClose').onclick=close;$('tasteTabCompare').onclick=showCompare;$('tasteTabRank').onclick=showRank;
-    $('tasteMode').onchange=next;$('tasteExport').onclick=exportCsv;
+    $('tasteMode').onchange=()=>{$('tasteRanking').hidden?next():showRank();};
+    $('tasteStage').onchange=()=>{skipped.clear();$('tasteRanking').hidden?next():showRank();};
+    $('tasteExport').onclick=exportCsv;
     root.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>vote(b.dataset.choice));
     root.addEventListener('click',e=>{if(e.target===root)close();});
     document.addEventListener('keydown',e=>{
@@ -188,7 +193,7 @@
     const toolbar=$('autoToolbar');
     if(toolbar){const b=document.createElement('button');b.type='button';b.id='tasteLabBtn';b.className='btn';b.textContent='사람의 눈';b.onclick=open;toolbar.append(b);}
     const anchor=$('mReview');
-    if(anchor){const b=document.createElement('button');b.id='mTasteLab';b.className='drawerItem';b.type='button';b.innerHTML='<b>사람의 눈 · 취향 연구</b><span>두 장 비교로 더 좋은 사진 찾기</span>';b.onclick=open;anchor.parentNode.insertBefore(b,anchor);}
+    if(anchor){const b=document.createElement('button');b.id='mTasteLab';b.className='drawerItem';b.type='button';b.innerHTML='<b>사람의 눈 · 취향 연구</b><span>두 장 비교로 더 좋은 사진 찾기</span>';b.onclick=()=>{document.querySelector('#mobileDrawer .drawerClose')?.click();open();};anchor.parentNode.insertBefore(b,anchor);}
   }
   init();
   window.__photoJudgeTasteLab={version:'0.1',open,close,getStats:()=>({loaded:items.length,comparisons:ratings().comparisons})};
