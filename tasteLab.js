@@ -171,7 +171,7 @@
       '<figure class="tastePhoto"><img id="tasteB" alt="사진 B"><figcaption id="tasteNameB"></figcaption></figure></div>'+
       '<div id="tasteEmpty" hidden></div>'+
       '<div id="tasteChoices"><button data-choice="a">A가 더 좋다</button><button data-choice="b">B가 더 좋다</button><button data-choice="tie">비슷하다</button><button data-choice="skip">건너뛰기</button></div></section>'+
-      '<section id="tasteRanking" hidden><div id="tasteRankRows"></div><p id="tasteHelp">Elo 상대 순위는 비교 수가 적으면 불안정합니다. 3회 미만은 표본 부족으로 표시합니다.</p></section>'+
+      '<section id="tasteRanking" hidden><div id="tasteRankRows"></div><p id="tasteRankHelp">Elo 상대 순위는 비교 수가 적으면 불안정합니다. 3회 미만은 표본 부족으로 표시합니다.</p></section>'+
       '<p id="tasteWarning"></p><button id="tasteExport">비교 기록 CSV 내보내기</button></section>';
     document.body.append(root);
     $('tasteClose').onclick=close;$('tasteTabCompare').onclick=showCompare;$('tasteTabRank').onclick=showRank;
